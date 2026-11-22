@@ -11,42 +11,90 @@ available in Azerbaijani, Russian and English.
 
 ## Features
 
-**Master (setup wizard).** It builds the script from fixed templates with no LLM, so the same answers always
-give the same script.
+The pictures below are generated from the app's own live diagram (`node tools/make-docs.mjs`). In the app
+they update as you fill in the form, the active step lights up, and a click on any part opens its step.
 
-- **Internet:** DHCP, static or PPPoE, or an LTE modem (built-in or USB).
-- **Second WAN with failover:** a recursive internet check or a simple gateway check.
-- **LAN:** any size from /16 to /30, with a DHCP server.
-- **Ports:** a role for each port (LAN, guest, cameras or disabled) and a free-text note that becomes the
-  port comment in Winbox.
-- **Speed limits:** per port in hardware (RB3011, RB2011) and per IP or range with simple queues.
-- **Guest network:** guests cannot see your devices.
-- **Camera network:** cameras cannot reach the LAN, the LAN can watch them, and internet access is optional
-  (time sync only by default).
-- **WiFi:** the `wifi` package (hAP ax) or the `wireless` package (hAP ac, LTE models), with a guest WiFi.
-- **Port forwarding** with hairpin NAT.
-- **Security:** port scan protection and a bogon filter, plus a country filter for port forwards. The
-  router downloads the country lists itself every day and checks them before importing.
-- **Firewall and hardening:** generated in every script.
-- **Live animated diagram:**
-  - traffic, blocked connections and allowed forwards
-  - a "cut the main line" failover simulation
-  - a port map
-  - click any part of the diagram to open the matching step
-- **Schema check:** each generated script is validated against a RouterOS command schema and
-  server-side lint rules.
+- Green dots show your internet traffic.
+- Red dots show unwanted connections from outside.
+- Orange dots show access from outside that you allowed.
 
-**AI assistant (optional).** It turns a free-text description into a RouterOS v6 or v7 script, or reviews a
-pasted `/export`. Any OpenAI-compatible endpoint works: LocalAI, Ollama, LM Studio or a hosted API. Each
-answer goes through lint, a schema check and automatic fix passes. Set `AI_ENABLED=false` to run a plain
-configurator with no AI wording and no LLM calls.
+### Master (setup wizard)
 
-**Settings (gear icon).** Turn the AI on or off and set the LLM address, model and limits from the app.
-You can also list the endpoint's models with *Test connection*. Values are saved on the data volume and
-override `.env`, which stays as the fallback (*Back to .env*). The API key is encrypted on the server
-(AES-256-GCM), never shown in the browser, and only sent to the address it was saved for. There is no
-login, so anyone who can open the app can change these settings. Put the app behind a reverse proxy with
-authentication if the network is not trusted.
+The Master builds the script from fixed templates, with no LLM involved, so the same answers always give the
+same script. The answers are checked as you go, and the result is validated against a RouterOS command
+schema and server-side lint rules.
+
+<p align="center"><img src="docs/diagram-overview.svg" alt="The whole network on one live picture" width="820"></p>
+
+### Internet and failover
+
+<p align="center"><img src="docs/diagram-failover.svg" alt="Failover: the main line is cut and traffic moves to LTE" width="820"></p>
+
+- **Connection types:** DHCP, static IP, PPPoE, or an LTE modem (built-in or USB, with APN and SIM PIN).
+- **Second line with failover:** recursive checks that ping real internet hosts, so failover also happens
+  when the provider fails and not only when the cable is pulled. A simple gateway check is also available.
+- **Failover simulation:** *Cut the main line* in the app shows the traffic moving to the backup.
+
+### Ports: which cable goes where
+
+<p align="center"><img src="docs/diagram-ports.svg" alt="Ports with their roles" width="820"></p>
+
+- **Role for every port:** local network, guest, cameras, or disabled. A disabled port is switched off
+  completely.
+- **Port notes:** a free-text note such as *1st floor switch port 5* becomes the port comment in Winbox. The
+  port map in the app lists every port with its role and note.
+- **Speed limits:** per port in hardware (RB3011, RB2011), and per device or IP range with simple queues.
+  FastTrack is turned off automatically when queues are used.
+- **LAN size:** any size from /16 to /30, with a DHCP server and an automatic range.
+
+### Guest, camera and WiFi networks
+
+<p align="center"><img src="docs/diagram-networks.svg" alt="Guest and camera networks" width="820"></p>
+
+- **Guest network:** guests reach the internet but cannot see your devices.
+- **Camera network:** cameras cannot reach the LAN, while the LAN can still watch them. Their internet access
+  is optional and off by default (time sync only), so cameras cannot send video to vendor clouds.
+- **WiFi:** the `wifi` package (hAP ax) or the `wireless` package (hAP ac, LTE models), each with its own
+  guest WiFi.
+
+### Protection and access from outside
+
+<p align="center"><img src="docs/diagram-security.svg" alt="Firewall, port forward and country filter" width="820"></p>
+
+- **Firewall and hardening:** included in every script. Unwanted connections from the internet are dropped,
+  management services are limited to the LAN, and services that are not needed are turned off.
+- **Port forwarding:** with hairpin NAT and an optional source address limit.
+- **Port scan protection and bogon filter:** both are on by default.
+- **Country filter:** allows the port forwards only from the chosen countries, or blocks the chosen
+  countries. The lists come from iwik.org; the router refreshes them daily and checks them before
+  importing, and the app shows how fresh each list is.
+
+### AI assistant (optional)
+
+- **What it does:** turns a free-text description into a RouterOS v6 or v7 script, or reviews a pasted
+  `/export`.
+- **LLM:** any OpenAI-compatible endpoint works, such as LocalAI, Ollama, LM Studio or a hosted API.
+- **Checks:** each answer goes through lint, a schema check and automatic fix passes.
+- **Turning it off:** with the AI off, the app becomes a plain configurator with no AI wording and makes no
+  LLM calls.
+
+### Settings (gear icon)
+
+- **What you can change:** turn the AI on or off, and set the LLM address, API key, model and limits from
+  the app. *Test connection* lists the endpoint's models.
+- **Where values are saved:** on the data volume, overriding `.env`. `.env` stays as the fallback, and *Back
+  to .env* returns to it.
+- **API key:** encrypted on the server (AES-256-GCM), never shown in the browser, and only sent to the
+  address it was saved for.
+- **No login:** anyone who can open the app can change these settings. If the network is not trusted, put
+  the app behind a reverse proxy with authentication.
+
+### Runs anywhere
+
+- **Platforms:** Docker (linux/amd64 and linux/arm64), Portainer, Arcane, plain Node.js, or a single `.exe`
+  for Windows x64 and x86.
+- **Languages:** Azerbaijani, Russian and English.
+- **RouterOS:** versions 6 (6.45+) and 7.
 
 ## Quick start (Docker)
 

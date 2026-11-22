@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 464" width="820" height="464" role="img" aria-label="The whole network on one live picture">
+<style>
+.dg-t { fill: #1b1f24; font: 13px system-ui, "Segoe UI", sans-serif; }
+.dg-b { font-weight: 700; }
+.dg-s { fill: #5b6470; font-size: 11.5px; }
+.dg-line { fill: none; stroke: #d8dde3; stroke-width: 3; stroke-linecap: round; }
+.dg-wan-act { stroke: color-mix(in srgb, #3fb950 70%, #d8dde3); }
+.dg-wan-stby { stroke: #d8dde3; stroke-dasharray: 6 6; }
+.dg-wan-down { stroke: #f85149; stroke-dasharray: 3 7; opacity: .7; }
+.dg-guest { stroke: color-mix(in srgb, #d29922 60%, #d8dde3); }
+.dg-fwd { stroke: color-mix(in srgb, #f08c2e 55%, transparent); stroke-width: 2; stroke-dasharray: 2 6; }
+.dg-cloud circle, .dg-cloud rect { fill: color-mix(in srgb, #4aa3df 22%, #ffffff); stroke: none; }
+.dg-cloud-down circle, .dg-cloud-down rect { fill: color-mix(in srgb, #f85149 16%, #ffffff); }
+.dg-cloud-stby circle, .dg-cloud-stby rect { opacity: .55; }
+.dg-st-act { fill: #3fb950; }
+.dg-st-down { fill: #f85149; }
+.dg-x { fill: #f85149; font: 700 22px system-ui, sans-serif; }
+.dg-router rect { fill: color-mix(in srgb, #0f7f73 16%, #ffffff); stroke: #0f7f73; stroke-width: 2.5; }
+.dg-rt { fill: #1b1f24; font: 700 15px system-ui, "Segoe UI", sans-serif; }
+.dg-rs { fill: #5b6470; font: 11.5px system-ui, sans-serif; }
+.dg-led { fill: #3fb950; animation: dg-blink 1.3s infinite; }
+.dg-ant { stroke: #0f7f73; stroke-width: 3; stroke-linecap: round; }
+.dg-waves path { fill: none; stroke: #0f7f73; stroke-width: 2.4; stroke-linecap: round; animation: dg-blink 1.6s infinite; }
+.dg-shield path:first-child { fill: color-mix(in srgb, #3fb950 20%, #ffffff); stroke: #3fb950; stroke-width: 2.2; }
+.dg-check { fill: none; stroke: #3fb950; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.dg-ico rect, .dg-ico path { fill: none; stroke: #1b1f24; stroke-width: 2; stroke-linejoin: round; }
+.dg-ico .dg-fill { fill: #1b1f24; }
+.dg-ok { fill: #3fb950; }
+.dg-bad { fill: #f85149; }
+.dg-fw { fill: #f08c2e; }
+.dg-fwt { fill: #c8701f; }
+.dg-wall { stroke: #f85149; stroke-width: 2; stroke-dasharray: 8 5; }
+.dg-wallt { fill: #f85149; }
+.dg-geo rect { stroke-width: 1.5; }
+.dg-geo-allow rect { fill: color-mix(in srgb, #3fb950 15%, #ffffff); stroke: #3fb950; }
+.dg-geo-block rect { fill: color-mix(in srgb, #f85149 12%, #ffffff); stroke: #f85149; }
+.dg-geo text { fill: #1b1f24; font: 600 11.5px system-ui, sans-serif; }
+.dg-part { transition: opacity .35s ease; }
+.dg-part[data-dg-go], .dg-badge {  outline: none; }
+.dg-part[data-dg-go]:hover, .dg-part[data-dg-go]:focus-visible { filter: drop-shadow(0 0 4px color-mix(in srgb, #0f7f73 65%, transparent)); }
+.dg-on { animation: dg-glow 1.7s ease-in-out infinite; }
+@keyframes dg-glow { 0%, 100% { filter: drop-shadow(0 0 1px color-mix(in srgb, #0f7f73 40%, transparent)); } 50% { filter: drop-shadow(0 0 9px #0f7f73); } }
+.dg-badge circle { fill: #ffffff; stroke: #0f7f73; stroke-width: 1.6; transition: fill .2s; }
+.dg-badge text { fill: #0f7f73; font: 700 11px system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.dg-badge:hover circle, .dg-badge:focus-visible circle { fill: color-mix(in srgb, #0f7f73 25%, #ffffff); }
+.dg-badge-on circle { fill: #0f7f73; }
+.dg-badge-on text { fill: #ffffff; }
+.dg-badge-on { animation: dg-pop 1.7s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes dg-pop { 50% { transform: scale(1.22); } }
+.dg-on .dg-router rect, .dg-on .dg-shield path:first-child { stroke-width: 3.5; }
+.dg-port { fill: #0f7f73; font: 700 12px ui-monospace, Consolas, monospace; }
+.dg-port-off { fill: #5b6470; }
+.dg-wifit { font-size: 12px; fill: #0f7f73; }
+.dg-k0 { background: #3fb950; }
+.dg-k1 { background: #f85149; }
+.dg-k2 { background: #f08c2e; }
+@keyframes dg-blink { 50% { opacity: .35; } }
+.dg-pmg { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px; margin-top: 6px; }
+.dg-pmi { display: flex; flex-direction: column; gap: 1px; border: 1px solid #d8dde3; border-left: 4px solid #d8dde3; border-radius: 6px; padding: 4px 8px; background: #ffffff; min-width: 0; }
+.dg-pmi code { font: 700 12px ui-monospace, Consolas, monospace; color: #1b1f24; }
+.dg-pmi span { color: #5b6470; }
+.dg-pmi em { font-style: normal; color: #1b1f24; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dg-camline { stroke: color-mix(in srgb, #8b6fd6 65%, #d8dde3); }
+.dg-camwall { stroke: #8b6fd6; stroke-width: 2; stroke-dasharray: 8 5; }
+.dg-camt { fill: #8b6fd6; }
+.dg-cw { fill: #8b6fd6; }
+.bgc { fill: #ffffff; stroke: #d8dde3; }
+.cap { fill: #0f7f73; font: 600 13px system-ui, "Segoe UI", sans-serif; }</style>
+<rect class="bgc" x="0.5" y="0.5" width="819" height="463" rx="14"/>
+<text class="cap" x="18" y="24">The whole network on one live picture</text>
+<g transform="translate(0 30)"><g class="dg-part"><path class="dg-line dg-wan-act" d="M340 153 C 260 153, 228 92, 152 92"/><g class="dg-cloud dg-cloud-act"><circle cx="82" cy="94" r="17"/><circle cx="108" cy="82" r="24"/><circle cx="134" cy="94" r="17"/><rect x="82" y="94" width="52" height="17"/></g><text class="dg-t dg-b" x="108" y="132" text-anchor="middle">Provider 1</text><text class="dg-t dg-s" x="108" y="147" text-anchor="middle">cable</text><text class="dg-t dg-s dg-st-act" x="108" y="161" text-anchor="middle">● working</text><path class="dg-line dg-wan-stby" d="M340 189 C 260 189, 228 252, 152 252"/><g class="dg-cloud dg-cloud-stby"><circle cx="82" cy="254" r="17"/><circle cx="108" cy="242" r="24"/><circle cx="134" cy="254" r="17"/><rect x="82" y="254" width="52" height="17"/></g><text class="dg-t dg-b" x="108" y="292" text-anchor="middle">Provider 2</text><text class="dg-t dg-s" x="108" y="307" text-anchor="middle">mobile internet (SIM)</text><text class="dg-t dg-s dg-st-stby" x="108" y="321" text-anchor="middle">● on standby</text><g class="dg-ico" transform="translate(100 238)"><path d="M0 0h11l5 5v15H0z"/><path d="M3 9h10M3 13h10" /></g></g><g class="dg-part"><path class="dg-line dg-lan" d="M480 171 H600 M600 78 V178"/><path class="dg-line dg-lan" d="M600 78 H623"/><path class="dg-line dg-lan" d="M600 128 H623"/><path class="dg-line dg-lan" d="M600 178 H623"/></g><g class="dg-part"><path class="dg-line dg-guest" d="M405 214 V384 H623"/></g><g class="dg-part"><path class="dg-line dg-camline" d="M450 214 V300 H623"/></g><g class="dg-part"><circle class="dg-anim dg-ok" r="4.5" opacity="0"><animateMotion dur="3.4s" begin="0s" repeatCount="indefinite" path="M623 78 H600 V171 H405 L340 153 C 260 153, 228 92, 152 92"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.85;1" dur="3.4s" begin="0s" repeatCount="indefinite"/></circle><circle class="dg-anim dg-ok" r="4.5" opacity="0"><animateMotion dur="3.4s" begin="0.85s" repeatCount="indefinite" path="M623 128 H600 V171 H405 L340 153 C 260 153, 228 92, 152 92"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.85;1" dur="3.4s" begin="0.85s" repeatCount="indefinite"/></circle><circle class="dg-anim dg-ok" r="4.5" opacity="0"><animateMotion dur="3.4s" begin="1.7s" repeatCount="indefinite" path="M623 178 H600 V171 H405 L340 153 C 260 153, 228 92, 152 92"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.85;1" dur="3.4s" begin="1.7s" repeatCount="indefinite"/></circle><circle class="dg-anim dg-ok" r="4.5" opacity="0"><animateMotion dur="3.8s" begin="0.6s" repeatCount="indefinite" path="M623 384 H405 V171 L340 153 C 260 153, 228 92, 152 92"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.85;1" dur="3.8s" begin="0.6s" repeatCount="indefinite"/></circle><circle class="dg-anim dg-cw" r="3.5" opacity="0"><animateMotion dur="3.6s" begin="1.2s" repeatCount="indefinite" path="M623 78 H600 V171 H450 V300 H623"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.85;1" dur="3.6s" begin="1.2s" repeatCount="indefinite"/></circle><circle class="dg-anim dg-bad" r="4.5" opacity="0"><animateMotion dur="2.2s" begin="0.4s" repeatCount="indefinite" path="M623 300 H450 V218"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.85;1" dur="2.2s" begin="0.4s" repeatCount="indefinite"/></circle></g><g class="dg-part"><circle class="dg-anim dg-bad" r="4.5" opacity="0"><animateMotion dur="2.6s" begin="0.3s" repeatCount="indefinite" path="M152 66 C 238 66, 234 131, 290 167"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.85;1" dur="2.6s" begin="0.3s" repeatCount="indefinite"/></circle><circle class="dg-anim dg-bad" r="4.5" opacity="0"><animateMotion dur="2.9s" begin="1.5s" repeatCount="indefinite" path="M152 278 C 238 278, 234 211, 290 175"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.85;1" dur="2.9s" begin="1.5s" repeatCount="indefinite"/></circle><path class="dg-line dg-fwd" d="M152 104 C 258 104, 250 177, 340 177 H450 V300 H623"/><circle class="dg-anim dg-fw" r="4.5" opacity="0"><animateMotion dur="4.2s" begin="0.8s" repeatCount="indefinite" path="M152 104 C 258 104, 250 177, 340 177 H450 V300 H623"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.85;1" dur="4.2s" begin="0.8s" repeatCount="indefinite"/></circle><text class="dg-t dg-s dg-fwt" x="405" y="236" text-anchor="middle">Allowed access from outside: port 8443</text><g class="dg-geo dg-geo-allow"><rect x="46" y="30" width="124" height="22" rx="11"/><text x="108" y="45" text-anchor="middle">only: AZ, TR</text></g><g class="dg-shield" transform="translate(294 171)"><path d="M0 -24 L18 -16 V2 C18 14 9 21 0 25 C-9 21 -18 14 -18 2 V-16 Z"/><path class="dg-check" d="M-7 0 l5 5 l9 -10"/></g><text class="dg-t dg-s" x="294" y="114" text-anchor="middle">Protection</text></g><g class="dg-part"><g class="dg-router"><rect x="330" y="128" width="150" height="86" rx="14"/><text class="dg-rt" x="405" y="162" text-anchor="middle">MikroTik</text><text class="dg-rs" x="405" y="180" text-anchor="middle">hAP ac2 / ac3</text><circle class="dg-led" cx="360" cy="198" r="3.2" style="animation-delay:0s"/><circle class="dg-led" cx="378" cy="198" r="3.2" style="animation-delay:0.37s"/><circle class="dg-led" cx="396" cy="198" r="3.2" style="animation-delay:0.74s"/><circle class="dg-led" cx="414" cy="198" r="3.2" style="animation-delay:1.1099999999999999s"/><circle class="dg-led" cx="432" cy="198" r="3.2" style="animation-delay:0.17999999999999994s"/><circle class="dg-led" cx="450" cy="198" r="3.2" style="animation-delay:0.55s"/></g></g><g class="dg-part"><path class="dg-ant" d="M352 128 v-22 M458 128 v-22"/><g class="dg-waves"><path d="M446 98 a16 16 0 0 1 24 0"/><path d="M440 91 a24 24 0 0 1 36 0"/></g><text class="dg-t dg-s dg-wifit" x="458" y="66" text-anchor="middle">WiFi: Office</text></g><g class="dg-part"><text class="dg-t dg-b" x="695" y="44" text-anchor="middle">Devices at home / in the office</text><text class="dg-t dg-s" x="695" y="58" text-anchor="middle">192.168.88.1/24</text><g class="dg-ico"><rect x="629" y="66" width="32" height="21" rx="3"/><path d="M624 91h42" stroke-width="3" stroke-linecap="round"/></g><text class="dg-t" x="675" y="83">Computer</text><g class="dg-ico"><rect x="637" y="113" width="16" height="29" rx="4"/><circle cx="645" cy="137" r="1.6" class="dg-fill"/></g><text class="dg-t" x="675" y="133">Phone</text><g class="dg-ico"><rect x="627" y="165" width="36" height="22" rx="3"/><path d="M637 192h16"/></g><text class="dg-t" x="675" y="183">TV</text></g><g class="dg-part"><text class="dg-port" x="196" y="82" text-anchor="middle">ether1</text><text class="dg-port" x="196" y="274" text-anchor="middle">lte1</text><text class="dg-port" x="488" y="162">ether2, ether3</text><text class="dg-port" x="415" y="376">ether5</text><text class="dg-port" x="460" y="292">ether4</text></g><g class="dg-part"><path class="dg-camwall" d="M570 266 H808"/><text class="dg-t dg-s dg-camt" x="705" y="259" text-anchor="middle">🔒 Cameras cannot reach the LAN</text><g class="dg-ico"><rect x="628" y="291" width="26" height="17" rx="4"/><path d="M654 297l9-5v15l-9-5z"/></g><text class="dg-t dg-b" x="675" y="302">Cameras</text><text class="dg-t dg-s" x="675" y="317">192.168.50.1/24</text><text class="dg-t dg-s dg-camt" x="675" y="331">internet: no (time only)</text></g><g class="dg-part"><path class="dg-wall" d="M570 354 H808"/><text class="dg-t dg-s dg-wallt" x="705" y="347" text-anchor="middle">🔒 Guests cannot see your devices</text><g class="dg-ico"><rect x="637" y="369" width="16" height="29" rx="4"/><circle cx="645" cy="393" r="1.6" class="dg-fill"/></g><text class="dg-t" x="675" y="389">Guest's phone</text></g><g class="dg-badge"><circle cx="476" cy="132" r="10"/><text x="476" y="132">1</text></g><g class="dg-badge"><circle cx="162" cy="62" r="10"/><text x="162" y="62">2</text></g><g class="dg-badge"><circle cx="576" cy="54" r="10"/><text x="576" y="54">3</text></g><g class="dg-badge"><circle cx="494" cy="195" r="10"/><text x="494" y="195">4</text></g><g class="dg-badge"><circle cx="510" cy="90" r="10"/><text x="510" y="90">5</text></g><g class="dg-badge"><circle cx="266" cy="141" r="10"/><text x="266" y="141">6</text></g></g>
+</svg>

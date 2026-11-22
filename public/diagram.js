@@ -89,7 +89,8 @@ export function renderDiagram(spec, lang, step, sim, label = '') {
   const camsOn = !!spec.cams?.enabled;
   const camY = 300, CAMX = RX + RW - 30;
   const gy = camsOn ? 384 : 304;
-  const H = guest ? gy + 46 : camsOn ? camY + 52 : 300;
+  // two providers: leave room for the second one's labels under its cloud
+  const H = Math.max(guest ? gy + 46 : camsOn ? camY + 52 : 300, two ? 330 : 0);
   const SHX = RX - 36;
 
   // port names for the "Ports" step
@@ -204,7 +205,7 @@ export function renderDiagram(spec, lang, step, sim, label = '') {
       + `<g class="dg-ico">${ICON.phone(DX, gy)}</g><text class="dg-t" x="${DX + 30}" y="${gy + 5}">${esc(t.guestPhone)}</text>`);
   }
   // numbered markers: where each step lives on the picture
-  s += badge(0, RX + RW - 4, RY + 4) + badge(1, CX + 54, wy[0] - 30) + badge(2, DX + 150, lanY[0] - 46) + badge(3, RX + RW + 14, RCY + 24);
+  s += badge(0, RX + RW - 4, RY + 4) + badge(1, CX + 54, wy[0] - 30) + badge(2, BUSX - 24, lanY[0] - 24) + badge(3, RX + RW + 14, RCY + 24);
   if (wifi) s += badge(4, RX + RW + 30, RY - 38); else if (guest) s += badge(4, RX + RW / 2 - 18, gy - 18); else if (camsOn) s += badge(4, CAMX - 18, camY - 18);
   s += badge(5, SHX - 28, RCY - 30);
   s += '</svg>';
