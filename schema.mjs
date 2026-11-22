@@ -1,11 +1,8 @@
 // RouterOS command schema taken from a real device (/console inspect), used to
 // (1) give the model an exact reference of menus/properties and (2) validate scripts.
-import { readFileSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readAsset, hasAsset } from './assets.mjs';
 
-const file = join(dirname(fileURLToPath(import.meta.url)), 'data', 'ros-schema.json');
-export const SCHEMA = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null;
+export const SCHEMA = hasAsset('data/ros-schema.json') ? JSON.parse(readAsset('data/ros-schema.json', 'utf8')) : null;
 
 const SINGLE = new Set(['protocol', 'chain', 'action', 'vlan-id', 'pvid', 'frame-types']);
 

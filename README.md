@@ -71,8 +71,26 @@ Finally it waits for the health check. Open `http://<host>:3090` when it finishe
 | Build from source | `docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build` |
 | Offline host | Put `mikrotikeasy-image-<version>.tar.gz` from the release next to `install.sh`, then run `sh install.sh` |
 | Portainer or Arcane | Paste `docker-compose.yml` and add the `.env` values as stack variables. Set `DATA_DIR` explicitly, because Portainer has no `$USER`. |
-| Plain Docker | `docker run -d --name mikrotikeasy -p 3090:3090 -v /srv/mikrotikeasy:/data --env-file .env ghcr.io/rmukhtarov/mikrotikeasy:1.0.0` |
+| Plain Docker | `docker run -d --name mikrotikeasy -p 3090:3090 -v /srv/mikrotikeasy:/data --env-file .env ghcr.io/rmukhtarov/mikrotikeasy:1.1.0` |
 | Without Docker (Node.js 18 or newer, no npm packages) | `cp .env.example .env && node server.mjs` |
+
+## Windows (single .exe, no installation)
+
+Download `MikrotikEasy-<version>-win-x64.exe` (64-bit Windows) or `-win-x86.exe` (32-bit) from the
+[releases](https://github.com/rmukhtarov/mikrotikeasy/releases) and double-click it.
+
+- The app opens in your browser at `http://127.0.0.1:3090`. If that port is taken, it tries the next ports.
+- Keep the console window open while you use the app. Closing the window stops it.
+- Settings, the encrypted API key and the AI mistake memory are kept in `%LOCALAPPDATA%\MikrotikEasy`. An
+  optional `.env` file is read from that folder or from the folder next to the `.exe`.
+- The `.exe` is not code-signed, so Windows SmartScreen may warn the first time. Click *More info* and then
+  *Run anyway*. Compare the file with `SHA256SUMS.txt` from the release.
+- `NO_BROWSER=1` starts the app without opening a browser. `HOST=0.0.0.0` lets other computers on the LAN
+  open it.
+
+Build the executables yourself on Windows with the same Node.js 22 version: `node tools/build-exe.mjs`. The
+build uses the Node.js single executable application feature with the official `node.exe` for each
+architecture, checked by SHA-256.
 
 ## Settings (`.env`)
 
@@ -83,7 +101,7 @@ Finally it waits for the health check. Open `http://<host>:3090` when it finishe
 | `LLM_THINKING` | false | Keep this false for Qwen3-style models. With thinking on, one request can run for minutes. |
 | `LLM_MAX_TOKENS`, `LLM_TIMEOUT_MS`, `FIX_ROUNDS` | 8000, 300000, 2 | Generation limits |
 | `SETTINGS_SECRET` | random file in the data folder | Encryption secret for the API key saved from Settings |
-| `MIKROTIKEASY_TAG` | 1.0.0 | Image tag to run |
+| `MIKROTIKEASY_TAG` | 1.1.0 | Image tag to run |
 | `APP_PORT` | 3090 | Port on the host |
 | `DATA_DIR` | `/home/$USER/docker/mikrotikeasy/data` | Mistake memory of the AI assistant |
 | `NET_SUBNET`, `NET_GATEWAY` | 192.168.62.0/24, .1 | Docker network. Change it if this range is already in use. |
@@ -104,7 +122,7 @@ Always test a generated script on a lab device before production, and keep an `/
 
 ## Release bundle
 
-`bash tools/package.sh 1.0.0` writes `dist/mikrotikeasy-1.0.0.tar.gz`. Pushing a `v*` tag builds the
+`bash tools/package.sh 1.1.0` writes `dist/mikrotikeasy-1.1.0.tar.gz`. Pushing a `v*` tag builds the
 multi-arch image (linux/amd64 and linux/arm64) and publishes it to GHCR (`.github/workflows/docker.yml`).
 
 ## Credits and notices

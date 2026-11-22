@@ -1,6 +1,6 @@
 # MikrotikEasy: step-by-step RouterOS configurator + optional AI assistant. No npm dependencies.
 FROM node:22-alpine
-ARG VERSION=1.0.0
+ARG VERSION=1.1.0
 LABEL org.opencontainers.image.title="MikrotikEasy" \
       org.opencontainers.image.description="Step-by-step MikroTik RouterOS v6/v7 configurator with a live network diagram and an optional LLM assistant" \
       org.opencontainers.image.version="${VERSION}" \
@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.title="MikrotikEasy" \
       org.opencontainers.image.source="https://github.com/rmukhtarov/mikrotikeasy"
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=3090 MISTAKES_FILE=/data/mistakes.json TZ=Asia/Baku
 WORKDIR /app
-COPY package.json server.mjs prompts.mjs schema.mjs settings.mjs ./
+COPY package.json server.mjs prompts.mjs schema.mjs settings.mjs assets.mjs ./
 COPY data/ros-schema.json data/mistakes.json ./data/
 COPY public ./public
 RUN mkdir -p /data && chown node:node /data

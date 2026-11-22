@@ -1,20 +1,20 @@
 // Local RouterOS config generator: static UI + one API endpoint proxying to an
 // OpenAI-compatible LLM (LocalAI, Ollama, LM Studio, OpenAI...). No dependencies.
 import http from 'node:http';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, extname, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { systemPrompt, fixPrompt, lint, sanitize, DEVICES } from './prompts.mjs';
 import { SCHEMA } from './schema.mjs';
 import { createSettings } from './settings.mjs';
+import { ROOT, DATA_DIR, IS_EXE, readAsset, hasAsset } from './assets.mjs';
+import { spawn } from 'node:child_process';
 
-const ROOT = dirname(fileURLToPath(import.meta.url));
 let VERSION = 'dev';
-try { VERSION = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version; } catch { /* running without package.json */ }
+try { VERSION = JSON.parse(readAsset('package.json', 'utf8')).version; } catch { /* running without package.json */ }
 
-// .env loader (KEY=value lines)
-const envFile = join(ROOT, '.env');
-if (existsSync(envFile)) {
+// .env loader (KEY=value lines): next to the sources, or for the .exe next to it and in the data folder
+for (const envFile of IS_EXE ? [join(ROOT, '.env'), join(DATA_DIR, '.env')] : [join(ROOT, '.env')]) {
+  if (!existsSync(envFile)) continue;
   for (const line of readFileSync(envFile, 'utf8').split(/\r?\n/)) {
     const m = line.match(/^\s*([A-Z_]+)\s*=\s*(.*)\s*$/);
     if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '');
@@ -36,7 +36,7 @@ const CFG = {
 };
 
 // Settings saved from the UI override .env; .env stays as the fallback (and the source for a reset).
-const SETTINGS_FILE = process.env.SETTINGS_FILE || join(dirname(process.env.MISTAKES_FILE || join(ROOT, 'data', 'mistakes.json')), 'settings.json');
+const SETTINGS_FILE = process.env.SETTINGS_FILE || join(dirname(process.env.MISTAKES_FILE || join(DATA_DIR, 'mistakes.json')), 'settings.json');
 const settings = createSettings({
   file: SETTINGS_FILE,
   envCfg: { ai: CFG.ai, base: CFG.base, key: CFG.key, model: CFG.model, timeoutMs: CFG.timeoutMs, maxTokens: CFG.maxTokens, thinking: CFG.thinking, fixRounds: CFG.fixRounds },
@@ -83,17 +83,17 @@ async function settingsApi(req, res, path) {
 }
 
 // Mistake memory: counts of lint findings across runs; the most frequent go into the prompt.
-const MISTAKES_FILE = process.env.MISTAKES_FILE || join(ROOT, 'data', 'mistakes.json');
+const MISTAKES_FILE = process.env.MISTAKES_FILE || join(DATA_DIR, 'mistakes.json');
 let mistakes = {};
 // first run on a fresh volume: start from the mistake list shipped with the app
-for (const f of [MISTAKES_FILE, join(ROOT, 'data', 'mistakes.json')]) {
-  try { mistakes = JSON.parse(readFileSync(f, 'utf8')); break; } catch { /* try next */ }
+try { mistakes = JSON.parse(readFileSync(MISTAKES_FILE, 'utf8')); } catch {
+  try { mistakes = JSON.parse(readAsset('data/mistakes.json', 'utf8')); } catch { /* no seed */ }
 }
 const mistakeKey = (s) => s.replace(/ \(valid: .*$/, '').replace(/ in: \/.*$/, '').replace(/: \/[\s\S]*$/, '').replace(/"[^"]{80,}"/g, '"…"').slice(0, 200);
 function recordMistakes(list) {
   if (!list.length) return;
   for (const i of list) { const k = mistakeKey(i); mistakes[k] = (mistakes[k] || 0) + 1; }
-  try { writeFileSync(MISTAKES_FILE, JSON.stringify(mistakes, null, 1)); } catch (e) { console.log(`[mistakes] not saved: ${e.message}`); }
+  try { mkdirSync(dirname(MISTAKES_FILE), { recursive: true }); writeFileSync(MISTAKES_FILE, JSON.stringify(mistakes, null, 1)); } catch (e) { console.log(`[mistakes] not saved: ${e.message}`); }
 }
 // v6-specific findings only make sense in v6 prompts
 const topMistakes = (n = 12, ros = '7') => Object.entries(mistakes).filter(([k]) => ros === '6' || !/RouterOS v6/.test(k)).sort((a, b) => b[1] - a[1]).slice(0, n).map(([k]) => k);
@@ -228,14 +228,16 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method === 'GET' || req.method === 'HEAD') {
       const path = req.url.split('?')[0];
-      const file = join(ROOT, 'public', path === '/' ? 'index.html' : path.replace(/\.\./g, ''));
-      if (file.startsWith(join(ROOT, 'public')) && existsSync(file)) {
+      // only files inside public/, no ".." segments
+      const rel = `public/${path === '/' ? 'index.html' : decodeURIComponent(path).replace(/^\/+/, '')}`;
+      const file = rel;
+      if (!rel.includes('\\') && !rel.split('/').some((seg) => seg === '..' || seg === '') && hasAsset(rel)) {
         // no-cache: the browser revalidates, so a redeploy shows up without Ctrl+F5
         res.writeHead(200, { 'Content-Type': MIME[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
         if (req.method === 'HEAD') return res.end();
         // the page learns at load time whether the AI part exists, so nothing AI-related flashes up
-        if (file.endsWith('index.html')) return res.end(readFileSync(file, 'utf8').replace('<html lang="az">', `<html lang="az" data-ai="${CFG.ai ? 1 : 0}">`));
-        return res.end(readFileSync(file));
+        if (file.endsWith('index.html')) return res.end(readAsset(file, 'utf8').replace('<html lang="az">', `<html lang="az" data-ai="${CFG.ai ? 1 : 0}">`));
+        return res.end(readAsset(file));
       }
     }
     res.writeHead(404).end('Not found');
@@ -245,4 +247,18 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(CFG.port, CFG.host, () => console.log(`MikrotikEasy ${VERSION}: http://${CFG.host}:${CFG.port}  ${CFG.ai ? `(AI: ${CFG.model} @ ${CFG.base})` : '(AI disabled)'}`));
+// the .exe tries the next ports when 3090 is taken and opens the browser by itself
+let port = CFG.port;
+server.on('error', (e) => {
+  if (e.code === 'EADDRINUSE' && IS_EXE && port < CFG.port + 10) { port += 1; return server.listen(port, CFG.host); }
+  console.error(`Cannot start: ${e.message}`); process.exit(1);
+});
+server.on('listening', () => {
+  const url = `http://${CFG.host === '0.0.0.0' ? '127.0.0.1' : CFG.host}:${port}`;
+  console.log(`MikrotikEasy ${VERSION}: http://${CFG.host}:${port}  ${CFG.ai ? `(AI: ${CFG.model} @ ${CFG.base})` : '(AI disabled)'}`);
+  if (IS_EXE) {
+    console.log(`Data folder: ${DATA_DIR}\nKeep this window open while you use the app; close it to stop MikrotikEasy.`);
+    if (!/^(1|true|yes)$/i.test(process.env.NO_BROWSER || '')) spawn('cmd', ['/c', 'start', '', url], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
+  }
+});
+server.listen(port, CFG.host);

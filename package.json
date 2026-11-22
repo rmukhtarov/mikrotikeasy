@@ -1,6 +1,6 @@
 {
   "name": "mikrotikeasy",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Step-by-step MikroTik RouterOS v6/v7 configurator with a live network diagram and an optional LLM assistant",
   "license": "MIT",
   "type": "module",
