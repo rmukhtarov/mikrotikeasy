@@ -41,6 +41,13 @@ pasted `/export`. Any OpenAI-compatible endpoint works: LocalAI, Ollama, LM Stud
 answer goes through lint, a schema check and automatic fix passes. Set `AI_ENABLED=false` to run a plain
 configurator with no AI wording and no LLM calls.
 
+**Settings (gear icon).** Turn the AI on or off and set the LLM address, model and limits from the app.
+You can also list the endpoint's models with *Test connection*. Values are saved on the data volume and
+override `.env`, which stays as the fallback (*Back to .env*). The API key is encrypted on the server
+(AES-256-GCM), never shown in the browser, and only sent to the address it was saved for. There is no
+login, so anyone who can open the app can change these settings. Put the app behind a reverse proxy with
+authentication if the network is not trusted.
+
 ## Quick start (Docker)
 
 ```sh
@@ -75,6 +82,7 @@ Finally it waits for the health check. Open `http://<host>:3090` when it finishe
 | `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | empty | OpenAI-compatible endpoint. Examples for LocalAI, Ollama and hosted APIs are in `.env.example`. |
 | `LLM_THINKING` | false | Keep this false for Qwen3-style models. With thinking on, one request can run for minutes. |
 | `LLM_MAX_TOKENS`, `LLM_TIMEOUT_MS`, `FIX_ROUNDS` | 8000, 300000, 2 | Generation limits |
+| `SETTINGS_SECRET` | random file in the data folder | Encryption secret for the API key saved from Settings |
 | `MIKROTIKEASY_TAG` | 1.0.0 | Image tag to run |
 | `APP_PORT` | 3090 | Port on the host |
 | `DATA_DIR` | `/home/$USER/docker/mikrotikeasy/data` | Mistake memory of the AI assistant |

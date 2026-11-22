@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.title="MikrotikEasy" \
       org.opencontainers.image.source="https://github.com/rmukhtarov/mikrotikeasy"
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=3090 MISTAKES_FILE=/data/mistakes.json TZ=Asia/Baku
 WORKDIR /app
-COPY package.json server.mjs prompts.mjs schema.mjs ./
+COPY package.json server.mjs prompts.mjs schema.mjs settings.mjs ./
 COPY data/ros-schema.json data/mistakes.json ./data/
 COPY public ./public
 RUN mkdir -p /data && chown node:node /data

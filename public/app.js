@@ -1,6 +1,7 @@
 import { STR } from './i18n.js';
 import { WZ } from './wizard-i18n.js';
 import { createWizard } from './wizard.js';
+import { createSettingsDialog } from './settings.js';
 
 const $ = (id) => document.getElementById(id);
 const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
@@ -41,6 +42,8 @@ function render() {
   wizard?.render();
 }
 const AI = document.documentElement.dataset.ai !== '0';
+const settingsDlg = createSettingsDialog({ lang: () => lang, toast });
+$('gear').addEventListener('click', () => settingsDlg.open());
 let view = AI ? store.get('view') || 'wiz' : 'wiz';
 $('ros').value = store.get('aiRos') === '6' ? '6' : '7';
 $('ros').addEventListener('change', () => store.set('aiRos', $('ros').value));

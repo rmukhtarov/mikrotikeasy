@@ -6,6 +6,7 @@ import { join, extname, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { systemPrompt, fixPrompt, lint, sanitize, DEVICES } from './prompts.mjs';
 import { SCHEMA } from './schema.mjs';
+import { createSettings } from './settings.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 let VERSION = 'dev';
@@ -22,7 +23,7 @@ if (existsSync(envFile)) {
 const CFG = {
   port: Number(process.env.PORT || 3090),
   host: process.env.HOST || '127.0.0.1',
-  base: (process.env.LLM_BASE_URL || 'http://localhost:11434/v1').replace(/\/$/, ''),
+  base: (process.env.LLM_BASE_URL || '').replace(/\/$/, ''),
   key: process.env.LLM_API_KEY || '',
   model: process.env.LLM_MODEL || 'qwen2.5-coder:14b',
   timeoutMs: Number(process.env.LLM_TIMEOUT_MS || 240000),
@@ -33,6 +34,53 @@ const CFG = {
   // empty / unset: on only when an LLM endpoint is configured
   ai: process.env.AI_ENABLED ? !/^(0|false|no|off)$/i.test(process.env.AI_ENABLED) : !!process.env.LLM_BASE_URL,
 };
+
+// Settings saved from the UI override .env; .env stays as the fallback (and the source for a reset).
+const SETTINGS_FILE = process.env.SETTINGS_FILE || join(dirname(process.env.MISTAKES_FILE || join(ROOT, 'data', 'mistakes.json')), 'settings.json');
+const settings = createSettings({
+  file: SETTINGS_FILE,
+  envCfg: { ai: CFG.ai, base: CFG.base, key: CFG.key, model: CFG.model, timeoutMs: CFG.timeoutMs, maxTokens: CFG.maxTokens, thinking: CFG.thinking, fixRounds: CFG.fixRounds },
+});
+const applySettings = () => Object.assign(CFG, settings.effective());
+applySettings();
+
+async function readJson(req) {
+  let body = '';
+  for await (const c of req) { body += c; if (body.length > 400_000) throw new Error('Input too large'); }
+  return JSON.parse(body || '{}');
+}
+const sendJson = (res, code, obj) => { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(obj)); };
+
+// lists the models of an OpenAI-compatible endpoint; used by the settings page to check the connection
+async function testLlm(base, key) {
+  const r = await fetch(`${base}/models`, { headers: key ? { Authorization: `Bearer ${key}` } : {}, signal: AbortSignal.timeout(10_000) });
+  if (!r.ok) throw new Error(`HTTP ${r.status}: ${(await r.text()).slice(0, 160)}`);
+  const j = await r.json();
+  return (j.data || j.models || []).map((m) => m.id || m.name || m.model).filter(Boolean).slice(0, 300);
+}
+
+async function settingsApi(req, res, path) {
+  const ip = req.socket.remoteAddress || '';
+  if (path === '/api/settings' && req.method === 'GET') return sendJson(res, 200, settings.view());
+  if (path === '/api/settings' && req.method === 'PUT') {
+    settings.update(await readJson(req)); applySettings();
+    console.log(`[settings] saved from ${ip}: AI ${CFG.ai ? `on (${CFG.model} @ ${CFG.base})` : 'off'}`);
+    return sendJson(res, 200, settings.view());
+  }
+  if (path === '/api/settings/reset' && req.method === 'POST') { settings.resetToEnv(); applySettings(); return sendJson(res, 200, settings.view()); }
+  if (path === '/api/settings/test' && req.method === 'POST') {
+    const p = await readJson(req);
+    const base = String(p.base || CFG.base || '').trim().replace(/\/+$/, '');
+    if (!/^https?:\/\//i.test(base)) throw new Error('LLM address must start with http:// or https://');
+    // a typed key is used as is; the saved key only goes to the address it was saved for
+    const key = (typeof p.key === 'string' && p.key.trim()) || (base === CFG.base ? CFG.key : '');
+    try {
+      const models = await testLlm(base, key);
+      return sendJson(res, 200, { ok: true, models, modelFound: !p.model || models.includes(p.model) });
+    } catch (e) { return sendJson(res, 200, { ok: false, error: String(e.message || e).slice(0, 200) }); }
+  }
+  return sendJson(res, 404, { error: 'Not found' });
+}
 
 // Mistake memory: counts of lint findings across runs; the most frequent go into the prompt.
 const MISTAKES_FILE = process.env.MISTAKES_FILE || join(ROOT, 'data', 'mistakes.json');
@@ -143,6 +191,8 @@ async function run({ mode, input, deviceId, lang, ros }) {
 
 const server = http.createServer(async (req, res) => {
   try {
+    const urlPath = req.url.split('?')[0];
+    if (urlPath === '/api/settings' || urlPath.startsWith('/api/settings/')) return await settingsApi(req, res, urlPath);
     if (req.method === 'POST' && req.url === '/api/run') {
       if (!CFG.ai) { res.writeHead(404, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ error: 'AI is disabled on this server' })); }
       let body = '';
@@ -190,7 +240,7 @@ const server = http.createServer(async (req, res) => {
     }
     res.writeHead(404).end('Not found');
   } catch (e) {
-    res.writeHead(400, { 'Content-Type': 'application/json' });
+    res.writeHead(e.status || 400, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: e.message }));
   }
 });
