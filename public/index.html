@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MikrotikEasy</title>
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><img class="logo" src="/logo.svg" alt="" width="28" height="28"><span class="wm">Mikrotik<b>Easy</b></span></div>
+  <nav class="langs" id="langs">
+    <button data-lang="az">AZ</button><button data-lang="ru">RU</button><button data-lang="en">EN</button>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <h1 class="wm wm-hero"><img class="logo-hero" src="/logo.svg" alt="" width="56" height="56"><span>Mikrotik<b>Easy</b></span></h1>
+    <p data-t="tagline"></p>
+  </section>
+
+  <div class="views" id="views">
+    <button class="view active" data-view="wiz" id="vWiz"></button>
+    <button class="view" data-view="ai" id="vAi"></button>
+  </div>
+
+  <section class="card" id="wizView"></section>
+
+  <div id="aiView" class="hidden">
+  <section class="card">
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-mode="generate" data-t="generate"></button>
+      <button class="tab" data-mode="review" data-t="review"></button>
+    </div>
+
+    <label class="lbl" id="inputLabel" for="input"></label>
+    <textarea id="input" rows="9" spellcheck="false"></textarea>
+
+    <div id="examplesWrap">
+      <div class="lbl" data-t="examples"></div>
+      <div class="chips" id="examples"></div>
+    </div>
+
+    <div class="row grid-ai">
+      <div><label class="lbl" for="device" data-t="device"></label><select id="device"></select></div>
+      <div><label class="lbl" for="ros" data-t="ros"></label><select id="ros"><option value="7">RouterOS 7</option><option value="6">RouterOS 6 (6.45+)</option></select></div>
+    </div>
+
+    <div class="actions">
+      <small id="hint"></small>
+      <button id="run" class="primary"></button>
+    </div>
+  </section>
+
+  <section class="card hidden" id="out">
+    <div class="out-head">
+      <h2 data-t="result"></h2>
+      <div class="btns">
+        <button id="copy" data-t="copy"></button>
+        <button id="dl" data-t="download"></button>
+      </div>
+    </div>
+    <p id="summary"></p>
+    <div id="fixed" class="box ok hidden"></div>
+    <div id="missing" class="box accent hidden"></div>
+    <div id="findings" class="hidden"></div>
+    <div id="lint" class="box warnbox hidden"></div>
+    <pre id="script"></pre>
+    <p class="warn" data-t="warn"></p>
+  </section>
+
+  <section class="how">
+    <h2 data-t="how"></h2>
+    <ol id="steps"></ol>
+  </section>
+  </div>
+</main>
+<footer><span data-t="model"></span>: <code id="modelName">…</code></footer>
+<div id="toast" class="toast hidden"></div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>

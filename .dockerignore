@@ -1,0 +1,11 @@
+.env
+.git
+.github
+*.tar
+*.tar.gz
+dist
+tools
+deploy
+README.md
+docker-compose*.yml
+install.sh

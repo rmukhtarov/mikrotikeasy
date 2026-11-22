@@ -1,0 +1,38 @@
+# MikrotikEasy - works with docker compose, Portainer stacks and Arcane projects.
+# Runs the published image; to build from source instead:
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+# Settings come from .env next to this file (or the stack's environment variables).
+services:
+  mikrotikeasy:
+    image: ghcr.io/rmukhtarov/mikrotikeasy:${MIKROTIKEASY_TAG:-1.0.0}
+    container_name: mikrotikeasy
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ:-Asia/Baku}
+      - PUID=1000
+      - PGID=1000
+      - HOST=0.0.0.0
+      - PORT=3090
+      - MISTAKES_FILE=/data/mistakes.json
+      - AI_ENABLED=${AI_ENABLED:-}
+      - LLM_BASE_URL=${LLM_BASE_URL:-}
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_MODEL=${LLM_MODEL:-}
+      - LLM_MAX_TOKENS=${LLM_MAX_TOKENS:-8000}
+      - LLM_TIMEOUT_MS=${LLM_TIMEOUT_MS:-300000}
+      - LLM_THINKING=${LLM_THINKING:-false}
+      - FIX_ROUNDS=${FIX_ROUNDS:-2}
+    volumes:
+      - ${DATA_DIR:-/home/${USER}/docker/mikrotikeasy/data}:/data
+    ports:
+      - "${APP_PORT:-3090}:3090"
+    networks:
+      - mikrotikeasy_net
+
+networks:
+  mikrotikeasy_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${NET_SUBNET:-192.168.62.0/24}
+          gateway: ${NET_GATEWAY:-192.168.62.1}
