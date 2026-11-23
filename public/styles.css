@@ -245,3 +245,19 @@ html[data-ai="0"] #views, html[data-ai="0"] #aiView, html[data-ai="0"] footer { 
 .set-pw summary { cursor: pointer; color: var(--muted); }
 .set-foot { margin-top: 12px; text-align: right; }
 
+.wgcard { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: start; margin: 12px 0; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
+.wgqr { background: #fff; padding: 8px; border-radius: 8px; line-height: 0; }
+.wgqr svg { width: 100%; height: auto; }
+.wgconf pre { margin: 8px 0 0; }
+.wgrow .grid2 { align-items: end; }
+@media (max-width: 640px) { .wgcard { grid-template-columns: 1fr; } .wgqr { max-width: 240px; } }
+
+.chk-off { opacity: .55; cursor: not-allowed; }
+
+/* remote access tunnels on the diagram */
+.dg-tun { stroke-width: 2.5; stroke-dasharray: 7 5; }
+.dg-tun-wg { stroke: color-mix(in srgb, #4c8dff 70%, var(--line)); }
+.dg-tun-zt { stroke: color-mix(in srgb, #e0a500 70%, var(--line)); }
+.dg-wg { fill: #4c8dff; } .dg-zt { fill: #e0a500; }
+.dg-tunt-wg { fill: #4c8dff; } .dg-tunt-zt { fill: #c48f00; }
+.dg-k3 { background: linear-gradient(90deg, #4c8dff 50%, #e0a500 50%); }

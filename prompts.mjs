@@ -159,7 +159,7 @@ export function lint(script, { mode, deviceId, ros }, input = '') {
     if (used && !has(new RegExp(`^/interface list member add\\b.*\\blist=${n}\\b`))) issues.push(`Interface list "${n}" is used by rules but has no members ("/interface list member add list=${n} interface=..."): those rules match nothing.`);
   }
   // references to interfaces that do not exist
-  const created = new Set(L.map((l) => (l.match(/^\/interface [\w -]+? add\b.*\bname=([\w.-]+)/) || [])[1]).filter(Boolean));
+  const created = new Set(L.map((l) => (l.match(/^\/(?:interface [\w -]+?|zerotier interface) add\b.*\bname=([\w.-]+)/) || [])[1]).filter(Boolean));
   const physical = /^(ether\d+|sfp\d*|sfp-sfpplus\d+|sfp28-\d+|qsfp\S*|combo\d+|wlan\d+|wifi\d+|lte\d+|lo|all|none|dynamic|static|bridge|defconf)$/;
   const badIf = new Set();
   for (const l of L) {
@@ -267,7 +267,7 @@ export function lint(script, { mode, deviceId, ros }, input = '') {
     // menus whose properties are the same on v6 and v7: validate them against the v7 schema too
     const STABLE = /^\/(ip (address|pool|dhcp-server( network| lease)?|firewall (filter|nat|mangle|address-list)|service|dns|neighbor discovery-settings)|interface (bridge( port| vlan)?|vlan|list( member)?)|tool mac-server( mac-winbox)?|queue simple|system identity|user)\s+(add|set)\b/;
     issues.push(...schemaLint(L.filter((l) => STABLE.test(l)), deviceId));
-    const V7ONLY = [[/^\/interface wifi\b/, '/interface wifi (use /interface wireless)'], [/^\/interface wireguard\b/, '/interface wireguard (WireGuard does not exist on v6)'],
+    const V7ONLY = [[/^\/interface wifi\b/, '/interface wifi (use /interface wireless)'], [/^\/interface wireguard\b/, '/interface wireguard (WireGuard does not exist on v6)'], [/^\/zerotier\b/, '/zerotier (ZeroTier exists only in RouterOS 7)'],
       [/^\/routing table\b/, '/routing table (use routing-mark)'], [/^\/routing filter rule\b/, '/routing filter rule (use /routing filter add chain=...)'],
       [/^\/routing ospf interface-template\b/, '/routing ospf interface-template (use /routing ospf network)'], [/^\/routing bgp connection\b/, '/routing bgp connection (use /routing bgp peer)'],
       [/^\/container\b/, '/container'], [/^\/system ntp client servers\b/, '/system ntp client servers (use server-dns-names=)'], [/\brouting-table=/, 'routing-table= (use routing-mark=)']];

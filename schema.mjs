@@ -4,6 +4,18 @@ import { readAsset, hasAsset } from './assets.mjs';
 
 export const SCHEMA = hasAsset('data/ros-schema.json') ? JSON.parse(readAsset('data/ros-schema.json', 'utf8')) : null;
 
+// Menus of the "zerotier" extra package (not in the dump, which came from a router without it).
+const EXTRA_MENUS = {
+  '/zerotier': { cmds: ['enable', 'disable', 'print', 'set'], set: ['comment', 'disabled', 'identity', 'interfaces', 'name', 'numbers', 'port', 'route-distance'] },
+  '/zerotier interface': { cmds: ['add', 'disable', 'enable', 'print', 'remove', 'set'],
+    add: ['allow-default', 'allow-global', 'allow-managed', 'arp-timeout', 'comment', 'copy-from', 'disable-running-check', 'disabled', 'instance', 'name', 'network'],
+    set: ['allow-default', 'allow-global', 'allow-managed', 'arp-timeout', 'comment', 'disable-running-check', 'disabled', 'instance', 'name', 'network', 'numbers'] },
+  '/zerotier peer': { cmds: ['print'] },
+  '/zerotier controller': { cmds: ['add', 'print', 'remove', 'set'], add: ['broadcast', 'comment', 'copy-from', 'disabled', 'instance', 'ip-range', 'ip6-6plane', 'ip6-range', 'ip6-rfc4193', 'mtu', 'multicast-limit', 'name', 'network', 'private', 'routes'] },
+  '/zerotier controller member': { cmds: ['print', 'set'], set: ['authorized', 'comment', 'ip-address', 'name', 'numbers'] },
+};
+if (SCHEMA) for (const [k, v] of Object.entries(EXTRA_MENUS)) SCHEMA.menus[k] ??= v;
+
 const SINGLE = new Set(['protocol', 'chain', 'action', 'vlan-id', 'pvid', 'frame-types']);
 
 // menus always useful, plus keyword -> menus

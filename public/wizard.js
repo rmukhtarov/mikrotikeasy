@@ -1,5 +1,6 @@
 import { WZ } from './wizard-i18n.js';
-import { DEVICE_PORTS, defaultSpec, build, defaultPool, int2ip, geoList } from './wizard-core.js';
+import { DEVICE_PORTS, defaultSpec, build, defaultPool, int2ip, geoList, isWgKey, wgClientIps, wgClientConf } from './wizard-core.js';
+import { wgKeypair, wgPsk } from './wg-keys.js';
 import { renderDiagram } from './diagram.js';
 
 // ISO 3166-1 alpha-2 codes (iwik.org names its lists by these); names come from the browser in the UI language
@@ -24,13 +25,43 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
   const refreshDiagram = (now) => { clearTimeout(dgTimer); dgTimer = setTimeout(() => { const b = root.querySelector('.dg-box'); if (b) b.innerHTML = diagram(); }, now ? 0 : 450); };
 
   function load() {
-    try { const s = JSON.parse(store.get('wizard') || 'null'); if (s && s.wan1 && s.lan) return { ...defaultSpec(s.device), ...s }; } catch {}
+    try {
+      const s = JSON.parse(store.get('wizard') || 'null');
+      if (s && s.wan1 && s.lan) {
+        const r = { ...defaultSpec(s.device), ...s };
+        if (r.zt?.enabled && (!DEVICE_PORTS[r.device]?.zt || r.ros === '6')) r.zt = { ...r.zt, enabled: false };
+        return r;
+      }
+    } catch {}
     return null;
   }
   function save() {
     const c = JSON.parse(JSON.stringify(spec));
     SECRET.forEach((p) => set(c, p, ''));
     store.set('wizard', JSON.stringify(c));
+  }
+
+  // WireGuard keys are made in the browser (server fallback) and kept with the rest of the form in this browser only
+  // wgFailed stops the automatic retry from render() after an error (no request loop); buttons retry explicitly
+  let wgBusy = false, wgFailed = false;
+  async function wgEnsureKeys(all = false, auto = false) {
+    const v = spec.vpn; if (!v?.enabled || wgBusy || (auto && wgFailed)) return;
+    const need = all || !isWgKey(v.serverPriv) || !isWgKey(v.serverPub) || v.clients.some((c) => !isWgKey(c.priv) || !isWgKey(c.pub) || !isWgKey(c.psk));
+    if (!need) return;
+    wgBusy = true;
+    try {
+      if (all || !isWgKey(v.serverPriv) || !isWgKey(v.serverPub)) { const k = await wgKeypair(); v.serverPriv = k.priv; v.serverPub = k.pub; }
+      for (const c of v.clients) if (all || !isWgKey(c.priv) || !isWgKey(c.pub)) { const k = await wgKeypair(); c.priv = k.priv; c.pub = k.pub; }
+      for (const c of v.clients) if (all || !isWgKey(c.psk)) c.psk = wgPsk();
+      check = null; save(); wgFailed = false;
+    } catch { wgFailed = true; toast(T().vpnKeyErr); }
+    finally { wgBusy = false; }
+    render();
+  }
+  async function wgAddClient() {
+    const v = spec.vpn;
+    v.clients.push({ name: `${T().vpnDefaultName} ${v.clients.length + 1}`, priv: '', pub: '', psk: '' });
+    save(); render(); await wgEnsureKeys();
   }
 
   // ---- field helpers ----
@@ -45,6 +76,7 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
   });
   // RouterOS file names: keep them ASCII and space-free so /import file-name=... can be typed as is
   const fname = () => `${String(spec.identity || 'mikrotik').replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'mikrotik'}-v${spec.ros || '7'}-${new Date().toISOString().slice(0, 10)}.rsc`;
+  const wgFile = (name, i) => (String(name || '').normalize('NFD').replace(/[^A-Za-z0-9_=+.-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 15) || `wg-client-${i + 1}`);
   function secHtml() {
     const t = T();
     spec.security ||= { portscan: true, bogons: true, geoMode: 'off', geoCountries: 'AZ' };
@@ -53,6 +85,35 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
     h += `<div class="secopt">${field(t.geo, select('security.geoMode', [['off', t.geoOff], ['allow', t.geoAllow], ['block', t.geoBlock]]), spec.forwards.length ? t.geoHint : t.geoNeedFwd)}`;
     if (spec.security.geoMode !== 'off') h += ccPicker();
     return h + '</div>';
+  }
+  function vpnHtml() {
+    const t = T();
+    let h = `<h4>${esc(t.vpnTitle)}</h4><p class="muted">${esc(t.vpnIntro)}</p>`;
+    if (spec.ros === '6') return h + `<p class="box warnbox">${esc(t.vpnV6)}</p>`;
+    h += check_('vpn.enabled', t.vpnOn);
+    if (!spec.vpn.enabled) return h;
+    h += `<div class="grid2">${field(t.vpnEndpoint, input('vpn.endpoint', 'placeholder="vpn.example.com"'), t.vpnEndpointHint)}${field(t.vpnPort, input('vpn.port', 'inputmode="numeric" placeholder="13231"'), t.vpnPortHint)}</div>`;
+    h += `<div class="grid2">${field(t.vpnIp, input('vpn.address'))}${field(t.lanPrefix, select('vpn.prefix', prefixes(20, 29), false))}</div>`;
+    h += field(t.vpnAccess, select('vpn.access', [['lan', t.vpnAccLan], ['internet', t.vpnAccNet]]));
+    h += `<div class="secopt">${check_('vpn.fullTunnel', t.vpnFull)}<small>${esc(t.vpnFullHint)}</small></div>`;
+    const ips = wgClientIps(spec);
+    h += `<h4>${esc(t.vpnClientsTitle)}</h4>` + spec.vpn.clients.map((c, i) => `<div class="rowcard wgrow">
+      <div class="grid2">${field(t.vpnClient, input(`vpn.clients.${i}.name`, 'maxlength="40"'))}<div class="f"><span>${esc(t.vpnClientIp)}</span><code>${esc(ips[i] || '—')}</code></div></div>
+      <button class="link" data-wgdel="${i}">${esc(t.remove)}</button></div>`).join('');
+    h += `<div class="btns"><button class="chip" data-wgadd>${esc(t.vpnAdd)}</button><button class="chip" data-wgkeys>${esc(t.vpnRekey)}</button></div>`;
+    return h + `<p class="muted">${esc(t.vpnStore)}</p>`;
+  }
+  function ztHtml() {
+    const t = T();
+    let h = `<h4>${esc(t.ztTitle)}</h4><p class="muted">${esc(t.ztIntro)}</p>`;
+    if (spec.ros === '6') return h + `<p class="box warnbox">${esc(t.ztV6)}</p>`;
+    // the zerotier package exists only for ARM/ARM64: other models cannot turn it on
+    if (!DEVICE_PORTS[spec.device]?.zt) return h + `<label class="chk chk-off"><input type="checkbox" disabled> ${esc(t.ztOn)}</label><p class="box warnbox">${esc(t.ztNoDev)}</p>`;
+    h += check_('zt.enabled', t.ztOn);
+    if (!spec.zt.enabled) return h;
+    h += `<p class="box accent">${esc(t.ztReq)}</p>`;
+    h += `<div class="grid2">${field(t.ztNet, input('zt.network', 'placeholder="1d71939404912b40" maxlength="16" spellcheck="false" autocomplete="off"'), t.ztNetHint)}${field(t.ztSub, input('zt.subnet', 'placeholder="10.147.17.0/24"'), t.ztSubHint)}</div>`;
+    return h + field(t.ztAccess, select('zt.access', [['lan', t.ztAccLan], ['router', t.ztAccRouter]]));
   }
   function ccChips() {
     const t = T(), sel = geoList(spec.security?.geoCountries);
@@ -171,6 +232,8 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
         return h;
       }
       case 5: {
+        spec.vpn ||= defaultSpec(spec.device).vpn;
+        spec.zt ||= defaultSpec(spec.device).zt;
         const fw = spec.forwards.map((f, i) => `<div class="rowcard">
           <div class="grid3">${field(t.fName, input(`forwards.${i}.name`))}${field(t.proto, select(`forwards.${i}.proto`, [['tcp', 'TCP'], ['udp', 'UDP'], ['both', 'TCP+UDP']], false))}${field(t.extPort, input(`forwards.${i}.extPort`, 'placeholder="8080" inputmode="numeric"'))}</div>
           <div class="grid3">${field(t.intIp, input(`forwards.${i}.ip`, 'placeholder="192.168.88.50"'))}${field(t.intPort, input(`forwards.${i}.intPort`, 'placeholder="80" inputmode="numeric"'))}${field(t.src, input(`forwards.${i}.src`))}</div>
@@ -178,22 +241,44 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
         const lm = spec.limits.map((l, i) => `<div class="rowcard"><div class="grid4">${field(t.fName, input(`limits.${i}.name`))}${field(t.target, input(`limits.${i}.target`, 'placeholder="192.168.88.100-192.168.88.150"'))}${field(t.down, input(`limits.${i}.down`, `placeholder="${esc(t.mbps)}" inputmode="decimal"`))}${field(t.up, input(`limits.${i}.up`, `placeholder="${esc(t.mbps)}" inputmode="decimal"`))}</div><button class="link" data-del="limits.${i}">${esc(t.remove)}</button></div>`).join('');
         return `<h3>${esc(t.fwd)}</h3>${fw}<button class="chip" data-addrow="forwards">${esc(t.fwdAdd)}</button>${spec.forwards.length ? check_('hairpin', t.hairpin) : ''}
           <h3>${esc(t.lim)}</h3>${lm}<button class="chip" data-addrow="limits">${esc(t.limAdd)}</button>
-          <h3>${esc(t.secTitle)}</h3>${secHtml()}`;
+          <h3>${esc(t.secTitle)}</h3>${secHtml()}<h3>${esc(t.remoteTitle)}</h3><p class="muted">${esc(t.remoteIntro)}</p>${vpnHtml()}${ztHtml()}`;
       }
       case 6: {
+        spec.vpn ||= defaultSpec(spec.device).vpn;
         const r = result;
         if (r.errors.length) return `<div class="box warnbox"><b>${esc(t.errors)}</b><ul>${r.errors.map((e) => `<li>${esc(e)}</li>`).join('')}</ul></div>`;
         const ck = check ? (check.issues.length ? `<div class="box warnbox"><b>${esc(t.checkBad)}</b><ul>${check.issues.map((e) => `<li>${esc(e)}</li>`).join('')}</ul></div>` : `<div class="box ok">✓ ${esc(spec.ros === '6' ? t.checkV6 : t.checkOk(check.schema || '7'))}</div>`) : '';
         return `${ck}<div class="box accent"><b>${esc(t.notes)}</b><ul>${r.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul></div>
           <div class="out-head"><h3>RouterOS</h3><div class="btns"><button data-act="copy">Copy</button><button data-act="dl">.rsc</button></div></div>
-          <pre>${esc(r.script)}</pre><h3>${esc(t.howApply)}</h3><ol class="muted apply">${t.apply(fname()).map((a) => `<li>${code(a)}</li>`).join('')}</ol>`;
+          <pre>${esc(r.script)}</pre><h3>${esc(t.howApply)}</h3><ol class="muted apply">${t.apply(fname()).map((a) => `<li>${code(a)}</li>`).join('')}</ol>${wgResultHtml()}`;
       }
     }
     return '';
   }
 
+  function wgResultHtml() {
+    const t = T();
+    if (!spec.vpn?.enabled || spec.ros === '6') return '';
+    const ips = wgClientIps(spec);
+    let h = `<h3>${esc(t.vpnClients)}</h3><p class="box warnbox">${esc(t.vpnClientsHint)}</p>`;
+    for (let i = 0; i < spec.vpn.clients.length; i++) {
+      const conf = wgClientConf(spec, i), ip = ips[i] || '—', name = spec.vpn.clients[i].name;
+      let svg = '';
+      if (typeof qrcode === 'function') { try { const qr = qrcode(0, 'M'); qr.addData(conf); qr.make(); svg = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); } catch { svg = ''; } }
+      h += `<div class="wgcard">
+        <div class="wgqr">${svg}</div>
+        <div class="wgconf">
+          <div class="out-head"><b>${esc(name)}</b> <code>${esc(ip)}</code><div class="btns"><button data-wgcopy="${i}">${esc(t.vpnCopy)}</button><button data-wgdl="${i}">.conf</button></div></div>
+          <pre>${esc(conf)}</pre>
+        </div>
+      </div>`;
+    }
+    return h;
+  }
+
   function render() {
     const t = T();
+    if (step === 5 || step === 6) { spec.vpn ||= defaultSpec(spec.device).vpn; spec.zt ||= defaultSpec(spec.device).zt; }
     if (step === 6) result = build(spec, getLang());
     root.innerHTML = `<p class="muted">${esc(t.wizIntro)}</p>
       <ol class="stepper">${t.steps.map((s, i) => `<li class="${i === step ? 'cur' : i < step ? 'done' : ''}"><button data-go="${i}"><span>${i + 1}</span>${esc(s)}</button></li>`).join('')}</ol>
@@ -207,6 +292,7 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
       fetch('/api/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ script: result.script, deviceId: spec.device, ros: spec.ros }) })
         .then((r) => r.json()).then((c) => { check = c; if (step === 6) render(); }).catch(() => {});
     }
+    if ((step === 5 || step === 6) && spec.vpn?.enabled && spec.ros !== '6') wgEnsureKeys(false, true);
   }
 
   function onInput(e) {
@@ -220,6 +306,13 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
       for (const k of ['wan1', 'wan2']) if (DEVICE_PORTS[v].noLte && spec[k].type === 'lte') spec[k].type = 'dhcp';
     } else set(spec, p, v);
     if (p === 'ros' && v === '6' && DEVICE_PORTS[spec.device]?.v7only) { const d = defaultSpec('any'); spec.device = 'any'; spec.ports = d.ports; spec.wan1.port = 'ether1'; spec.wan2.port = d.wan2.port; spec.wifi.enabled = false; }
+    // ZeroTier only on models that can run it, neither ZeroTier nor WireGuard on RouterOS 6 (their switches are hidden there)
+    if (p === 'device' || p === 'ros') {
+      spec.zt ||= defaultSpec(spec.device).zt;
+      if (!DEVICE_PORTS[spec.device]?.zt || spec.ros === '6') spec.zt.enabled = false;
+      if (spec.ros === '6' && spec.vpn) spec.vpn.enabled = false;
+    }
+    if (p === 'vpn.enabled' && v && !spec.vpn.clients.length) spec.vpn.clients.push({ name: `${T().vpnDefaultName} 1`, priv: '', pub: '', psk: '' });
     check = null; save();
     if (el.hasAttribute('data-re')) render(); else refreshDiagram();
   }
@@ -253,6 +346,15 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
     if (b.hasAttribute('data-sim')) { sim.down = !sim.down; refreshDiagram(true); }
     else if (b.dataset.ccrm) setCountries(geoList(spec.security.geoCountries).filter((c) => c !== b.dataset.ccrm));
     else if (b.hasAttribute('data-ccclear')) setCountries([]);
+    else if (b.hasAttribute('data-wgadd')) wgAddClient();
+    else if (b.dataset.wgdel !== undefined) { spec.vpn.clients.splice(+b.dataset.wgdel, 1); check = null; save(); render(); }
+    else if (b.hasAttribute('data-wgkeys')) { if (confirm(T().vpnRekeyConfirm)) wgEnsureKeys(true); }
+    else if (b.dataset.wgcopy !== undefined) { await navigator.clipboard.writeText(wgClientConf(spec, +b.dataset.wgcopy)); toast('✓'); }
+    else if (b.dataset.wgdl !== undefined) {
+      const i = +b.dataset.wgdl, a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([wgClientConf(spec, i)], { type: 'text/plain' }));
+      a.download = `${wgFile(spec.vpn.clients[i].name, i)}.conf`; a.click();
+    }
     else if (b.dataset.go) { step = +b.dataset.go; render(); }
     else if (b.dataset.addrow) {
       spec[b.dataset.addrow].push(b.dataset.addrow === 'forwards' ? { name: '', proto: 'tcp', extPort: '', ip: '', intPort: '', src: '' } : { name: '', target: '', down: '', up: '' });

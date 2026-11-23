@@ -2,18 +2,18 @@
 // Pure module (no DOM): used by the browser UI and by the server for validation.
 
 export const DEVICE_PORTS = {
-  any: { ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5'], wifi: false, bw: 'no' },
-  'hex-s': { ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5', 'sfp1'], wifi: false, bw: 'no' },
-  'hap-ax': { label: 'hAP ax2 / ax3 / ax lite', ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5'], wifi: 'wifi', bw: 'no', v7only: true },
+  any: { ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5'], wifi: false, bw: 'no', zt: false },
+  'hex-s': { ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5', 'sfp1'], wifi: false, bw: 'no', zt: false },
+  'hap-ax': { label: 'hAP ax2 / ax3 / ax lite', ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5'], wifi: 'wifi', bw: 'no', v7only: true, zt: true },
   // hAP ac2/ac3 and the LTE models use the classic wireless package (wlan1 = 2.4 GHz, wlan2 = 5 GHz)
-  'hap-ac': { label: 'hAP ac2 / ac3', ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5'], wifi: 'wireless', bw: 'no' },
-  'lte-builtin': { label: 'hAP ac3 LTE6 / Chateau LTE / LtAP (LTE)', ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5'], wifi: 'wireless', wlan2Optional: true, bw: 'no', lteBuiltin: true },
-  rb3011: { ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5', 'ether6', 'ether7', 'ether8', 'ether9', 'ether10', 'sfp1'], wifi: false, bw: 'full' },
-  rb4011: { ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5', 'ether6', 'ether7', 'ether8', 'ether9', 'ether10', 'sfp-sfpplus1'], wifi: false, bw: 'no' },
-  rb5009: { ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5', 'ether6', 'ether7', 'ether8', 'sfp-sfpplus1'], wifi: false, bw: 'no', v7only: true },
-  rb2011: { ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5', 'ether6', 'ether7', 'ether8', 'ether9', 'ether10', 'sfp1'], wifi: false, bw: 'partial', bwRx: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5', 'sfp1'] },
-  ccr: { ports: ['ether1', ...Array.from({ length: 12 }, (_, i) => `sfp-sfpplus${i + 1}`)], wifi: false, bw: 'no' },
-  chr: { ports: ['ether1', 'ether2', 'ether3', 'ether4'], wifi: false, bw: 'no', noLte: true },
+  'hap-ac': { label: 'hAP ac2 / ac3', ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5'], wifi: 'wireless', bw: 'no', zt: true },
+  'lte-builtin': { label: 'hAP ac3 LTE6 / Chateau LTE / LtAP (LTE)', ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5'], wifi: 'wireless', wlan2Optional: true, bw: 'no', lteBuiltin: true, zt: false },
+  rb3011: { ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5', 'ether6', 'ether7', 'ether8', 'ether9', 'ether10', 'sfp1'], wifi: false, bw: 'full', zt: true },
+  rb4011: { ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5', 'ether6', 'ether7', 'ether8', 'ether9', 'ether10', 'sfp-sfpplus1'], wifi: false, bw: 'no', zt: true },
+  rb5009: { ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5', 'ether6', 'ether7', 'ether8', 'sfp-sfpplus1'], wifi: false, bw: 'no', v7only: true, zt: true },
+  rb2011: { ports: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5', 'ether6', 'ether7', 'ether8', 'ether9', 'ether10', 'sfp1'], wifi: false, bw: 'partial', bwRx: ['ether1', 'ether2', 'ether3', 'ether4', 'ether5', 'sfp1'], zt: false },
+  ccr: { ports: ['ether1', ...Array.from({ length: 12 }, (_, i) => `sfp-sfpplus${i + 1}`)], wifi: false, bw: 'no', zt: false },
+  chr: { ports: ['ether1', 'ether2', 'ether3', 'ether4'], wifi: false, bw: 'no', noLte: true, zt: false },
 };
 
 // ---------- IPv4 helpers ----------
@@ -97,6 +97,21 @@ const MSG = {
     nReset: 'Skripti təmiz router-ə tətbiq edin: /system reset-configuration no-defaults=yes, sonra Winbox ilə MAC üzərindən LAN portuna qoşulub New Terminal-a yapışdırın.',
     nRecursive: (a, b) => `Failover: əsas xətt ${a} ünvanı ilə yoxlanır${b ? `, ehtiyat xətt ${b} ilə` : ''}. Ünvan cavab verməyəndə trafik ehtiyat xəttə keçir (yalnız kabel deyil, provayderin özü düşəndə də).`,
     nSimple: 'Failover: əsas xəttin gateway-i cavab verməyəndə ehtiyat xəttə keçid.',
+    wgV6: 'WireGuard RouterOS 6-da yoxdur; RouterOS 7 seçin və ya VPN-i söndürün.',
+    wgEndpoint: 'VPN: router-in xarici ünvanını yazın (statik public IP və ya DNS adı, məs. DDNS).',
+    wgPort: 'VPN: port 1 ilə 65535 arasında ədəd olmalıdır.',
+    wgOverlap: 'VPN şəbəkəsi LAN, qonaq və ya kamera şəbəkəsi ilə üst-üstə düşür.',
+    wgNoClients: 'VPN: ən azı bir cihaz (klient) əlavə edin.',
+    wgName: 'VPN: hər cihazın unikal adı olmalıdır.',
+    wgFull: 'VPN: şəbəkə bu qədər cihaz üçün çox kiçikdir; daha böyük şəbəkə ölçüsü seçin.',
+    wgKeys: 'VPN: açarlar yoxdur və ya yanlışdır, "Yeni açarlar" düyməsini basın.',
+    nWg: (endpoint, port, n) => `VPN: cihazlar ${endpoint}:${port} (UDP) ünvanına qoşulur. Router başqa router-in arxasındadırsa və ya provayder daxili/CGNAT ünvan (100.64.x.x, 10.x.x.x) verirsə, UDP ${port} router-ə çatmayacaq: həmin portu yuxarıdakı router-də yönləndirin və ya provayderdən statik public IP istəyin. ${n} cihazın konfiqurasiyası (.conf və QR kod) nəticə səhifəsindədir, onları rəsmi WireGuard tətbiqinə idxal edin. Hər konfiqurasiyada gizli açar var: onu yalnız sahibinə və şəxsən verin. Router-də yoxlamaq: /interface wireguard peers print (last-handshake qoşulan cihazları göstərir).`,
+    ztV6: 'ZeroTier RouterOS 6-da yoxdur: RouterOS 7 seçin və ya ZeroTier-i söndürün.',
+    ztArch: 'Seçilən modeldə ZeroTier işləmir: paket yalnız ARM/ARM64 router-lər üçündür. ZeroTier hAP ax, hAP ac2/ac3, RB3011, RB4011 və RB5009 üçün açılır.',
+    ztNet: 'ZeroTier: şəbəkə ID-si 16 simvollu olmalıdır (0-9, a-f), məs. 1d71939404912b40.',
+    ztSub: 'ZeroTier: şəbəkə aralığını a.b.c.d/nn şəklində yazın, məs. 10.147.17.0/24.',
+    ztOverlap: 'ZeroTier şəbəkəsi LAN, qonaq, kamera və ya WireGuard şəbəkəsi ilə üst-üstə düşür.',
+    nZt: (id, lanCidr) => `ZeroTier, tətbiqdən ƏVVƏL: 1) mikrotik.com/download-dan modelinizin "Extra packages" arxivini yükləyin, zerotier-*.npk faylını Winbox → Files-a atın və router-i yenidən başladın. 2) /system device-mode print: zerotier: no görünürsə, /system device-mode update zerotier=yes işlədin və 5 dəqiqə ərzində router-in reset/mode düyməsini basın (və ya elektrikdən çıxarıb taxın). Skriptin ZeroTier hissəsi ən sondadır: paket yoxdursa, yalnız o hissə alınmır. Tətbiqdən SONRA: my.zerotier.com → ${id} şəbəkəsi → Members bölməsində router-ə icazə verin (Auth)${lanCidr ? `, Managed Routes-a ${lanCidr} via <router-in ZeroTier IP-si> əlavə edin (IP: /ip address print where interface=zt-remote)` : ''}. Telefon və noutbuklara ZeroTier One tətbiqini quraşdırın, ${id} şəbəkəsinə qoşun və onlara da Members-də icazə verin. Yoxlamaq: /zerotier interface print, /zerotier peer print.`,
   },
   ru: {
     badIp: (f) => `${f}: неверный IP-адрес.`, badPrefix: (f) => `${f}: маска (префикс) должна быть от 8 до 30.`,
@@ -120,6 +135,21 @@ const MSG = {
     nReset: 'Применяйте на чистый роутер: /system reset-configuration no-defaults=yes, затем подключитесь Winbox по MAC к LAN-порту и вставьте в New Terminal.',
     nRecursive: (a, b) => `Failover: основной канал проверяется по ${a}${b ? `, резервный по ${b}` : ''}. Если адрес не отвечает, трафик уходит на резерв (даже если упал сам провайдер, а не кабель).`,
     nSimple: 'Failover: переключение на резерв, когда шлюз основного канала не отвечает.',
+    wgV6: 'В RouterOS 6 нет WireGuard: выберите RouterOS 7 или отключите VPN.',
+    wgEndpoint: 'VPN: укажите внешний адрес роутера (публичный IP или DNS-имя, например DDNS).',
+    wgPort: 'VPN: порт должен быть числом от 1 до 65535.',
+    wgOverlap: 'Сеть VPN пересекается с LAN, гостевой сетью или сетью камер.',
+    wgNoClients: 'VPN: добавьте хотя бы одно устройство (клиента).',
+    wgName: 'VPN: у каждого устройства должно быть своё уникальное имя.',
+    wgFull: 'VPN: сеть слишком мала для такого числа устройств, выберите размер побольше.',
+    wgKeys: 'VPN: ключи отсутствуют или неверны, нажмите «Новые ключи».',
+    nWg: (endpoint, port, n) => `Клиенты подключаются к ${endpoint}:${port} (UDP). Если роутер стоит за другим роутером или провайдер выдаёт частный/CGNAT-адрес (100.64.x.x, 10.x.x.x), входящий UDP ${port} не дойдёт: пробросьте его на вышестоящем роутере или попросите у провайдера публичный IP. Конфигурации ${n} клиентов (.conf и QR-код) на странице результата; импортируйте их в официальное приложение WireGuard. В каждой конфигурации есть закрытый ключ: передавайте её только владельцу и лично. Проверка на роутере: /interface wireguard peers print (last-handshake показывает подключённые устройства).`,
+    ztV6: 'В RouterOS 6 нет ZeroTier: выберите RouterOS 7 или отключите ZeroTier.',
+    ztArch: 'На выбранной модели ZeroTier не работает: пакет есть только для роутеров ARM/ARM64. ZeroTier доступен для hAP ax, hAP ac2/ac3, RB3011, RB4011 и RB5009.',
+    ztNet: 'ZeroTier: ID сети — 16 символов (0-9, a-f), например 1d71939404912b40.',
+    ztSub: 'ZeroTier: укажите диапазон сети в виде a.b.c.d/nn, например 10.147.17.0/24.',
+    ztOverlap: 'Сеть ZeroTier пересекается с LAN, гостевой сетью, сетью камер или WireGuard.',
+    nZt: (id, lanCidr) => `ZeroTier, ДО применения: 1) скачайте с mikrotik.com/download архив «Extra packages» для вашей модели, перетащите zerotier-*.npk в Winbox → Files и перезагрузите роутер. 2) /system device-mode print: если zerotier: no, выполните /system device-mode update zerotier=yes и в течение 5 минут нажмите кнопку reset/mode (или выключите и включите питание). Часть скрипта с ZeroTier стоит в самом конце: если пакета нет, не применится только она. ПОСЛЕ применения: my.zerotier.com → сеть ${id} → Members: авторизуйте роутер (Auth)${lanCidr ? `, в Managed Routes добавьте ${lanCidr} via <ZeroTier-IP роутера> (IP: /ip address print where interface=zt-remote)` : ''}. На телефоны и ноутбуки поставьте ZeroTier One, подключитесь к сети ${id} и авторизуйте их в Members. Проверка: /zerotier interface print, /zerotier peer print.`,
   },
   en: {
     badIp: (f) => `${f}: invalid IP address.`, badPrefix: (f) => `${f}: prefix must be between 8 and 30.`,
@@ -143,6 +173,21 @@ const MSG = {
     nReset: 'Apply to a clean router: /system reset-configuration no-defaults=yes, then connect with Winbox via MAC on a LAN port and paste into New Terminal.',
     nRecursive: (a, b) => `Failover: the main line is checked by pinging ${a}${b ? `, the backup by ${b}` : ''}. If it stops answering, traffic moves to the backup (also when the ISP itself fails, not just the cable).`,
     nSimple: 'Failover: switch to the backup when the main gateway stops answering.',
+    wgV6: 'WireGuard does not exist in RouterOS 6; choose RouterOS 7 or turn the VPN off.',
+    wgEndpoint: 'VPN: the router\'s public address (public IP or DNS name such as a DDNS name) is required.',
+    wgPort: 'VPN: the port must be a number from 1 to 65535.',
+    wgOverlap: 'VPN network overlaps the LAN, guest or camera network.',
+    wgNoClients: 'VPN: add at least one device (client).',
+    wgName: 'VPN: every device needs a unique name.',
+    wgFull: 'VPN: the network is too small for this many devices; choose a larger network size.',
+    wgKeys: 'VPN: keys are missing or invalid; press "New keys".',
+    nWg: (endpoint, port, n) => `Clients connect to ${endpoint}:${port} (UDP). If the router is behind another router or the ISP gives a private/CGNAT address (100.64.x.x, 10.x.x.x), inbound UDP ${port} will not arrive: forward it on the upstream router or ask the ISP for a public IP. The ${n} client configs (.conf and QR code) are on the result page; import them in the official WireGuard app. Each config contains a private key: send it to its owner only, privately. Check on the router: /interface wireguard peers print (last-handshake shows connected devices).`,
+    ztV6: 'ZeroTier does not exist in RouterOS 6: choose RouterOS 7 or turn ZeroTier off.',
+    ztArch: 'ZeroTier does not run on the selected model: the package exists only for ARM/ARM64 routers. ZeroTier is available for hAP ax, hAP ac2/ac3, RB3011, RB4011 and RB5009.',
+    ztNet: 'ZeroTier: the network ID is 16 characters (0-9, a-f), e.g. 1d71939404912b40.',
+    ztSub: 'ZeroTier: write the network range as a.b.c.d/nn, e.g. 10.147.17.0/24.',
+    ztOverlap: 'The ZeroTier network overlaps the LAN, guest, camera or WireGuard network.',
+    nZt: (id, lanCidr) => `ZeroTier, BEFORE applying: 1) download the "Extra packages" archive for your model from mikrotik.com/download, drop zerotier-*.npk into Winbox → Files and reboot the router. 2) /system device-mode print: if it shows zerotier: no, run /system device-mode update zerotier=yes and press the router's reset/mode button within 5 minutes (or unplug and replug the power). The ZeroTier part is the very last part of the script: without the package only that part fails. AFTER applying: my.zerotier.com → network ${id} → Members: authorize the router (Auth)${lanCidr ? `, and under Managed Routes add ${lanCidr} via <the router's ZeroTier IP> (IP: /ip address print where interface=zt-remote)` : ''}. Install ZeroTier One on phones and laptops, join network ${id} and authorize them in Members too. Check: /zerotier interface print, /zerotier peer print.`,
   },
 };
 
@@ -164,6 +209,9 @@ export function defaultSpec(device = 'any') {
     wifi: { enabled: !!d.wifi, ssid: 'MikroTik', pass: '', guestSsid: 'MikroTik-Guest', guestPass: '', country: 'Azerbaijan' },
     forwards: [], limits: [], hairpin: true,
     security: { portscan: true, bogons: true, geoMode: 'off', geoCountries: 'AZ' },
+    vpn: { enabled: false, endpoint: '', port: 13231, address: '10.10.100.1', prefix: 24, access: 'lan', fullTunnel: true, serverPriv: '', serverPub: '', clients: [] },
+    // ZeroTier: join a network made in ZeroTier Central (my.zerotier.com); subnet = that network's IPv4 auto-assign range
+    zt: { enabled: false, network: '', subnet: '10.147.17.0/24', access: 'lan' },
   };
 }
 
@@ -232,6 +280,45 @@ export function validate(spec, lang = 'en') {
     if (!toCidrs(l.target)) e.push(M.badIp(`${l.name || 'Limit'}: ${l.target}`));
     for (const k of ['down', 'up']) if (!validRate(l[k])) e.push(M.badRate(`${l.target} ${k}`));
   }
+  const vpn = spec.vpn?.enabled ? spec.vpn : null;
+  if (vpn) {
+    if (spec.ros === '6') e.push(M.wgV6);
+    if (!/^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$/.test(String(vpn.endpoint || ''))) e.push(M.wgEndpoint);
+    const portNum = Number(vpn.port);
+    if (!Number.isInteger(portNum) || portNum < 1 || portNum > 65535) e.push(M.wgPort);
+    const vs = subnet(vpn.address, vpn.prefix);
+    if (!vs) e.push(M.badIp('VPN'));
+    else {
+      if (lan && overlaps(vs, lan)) e.push(M.wgOverlap);
+      if (spec.guest.enabled) { const g = subnet(spec.guest.address, spec.guest.prefix); if (g && overlaps(vs, g)) e.push(M.wgOverlap); }
+      if (cm.enabled) { const c = subnet(cm.address, cm.prefix); if (c && overlaps(vs, c)) e.push(M.wgOverlap); }
+    }
+    if (!vpn.clients || vpn.clients.length === 0) e.push(M.wgNoClients);
+    else {
+      const names = new Set();
+      for (const cl of vpn.clients) {
+        const n = ascii(cl.name);
+        if (!n) { e.push(M.wgName); break; }
+        if (names.has(n.toLowerCase())) { e.push(M.wgName); break; }
+        names.add(n.toLowerCase());
+      }
+    }
+    const ips = wgClientIps(spec);
+    if (ips.some((ip) => ip === null)) e.push(M.wgFull);
+    if (!isWgKey(vpn.serverPriv) || !isWgKey(vpn.serverPub) || (vpn.clients || []).some((cl) => !isWgKey(cl.priv) || !isWgKey(cl.pub) || !isWgKey(cl.psk))) e.push(M.wgKeys);
+  }
+  const zt = spec.zt?.enabled ? spec.zt : null;
+  if (zt) {
+    if (spec.ros === '6') e.push(M.ztV6);
+    if (!DEVICE_PORTS[spec.device]?.zt) e.push(M.ztArch);
+    if (!/^[0-9a-fA-F]{16}$/.test(String(zt.network || '').trim())) e.push(M.ztNet);
+    const zs = ztSubnet(spec);
+    if (!zs) e.push(M.ztSub);
+    else {
+      const others = [lan, spec.guest.enabled ? subnet(spec.guest.address, spec.guest.prefix) : null, cm.enabled ? subnet(cm.address, cm.prefix) : null, spec.vpn?.enabled ? subnet(spec.vpn.address, spec.vpn.prefix) : null];
+      if (others.some((o) => o && overlaps(zs, o))) e.push(M.ztOverlap);
+    }
+  }
   return e;
 }
 
@@ -254,6 +341,10 @@ export function build(spec, lang = 'en') {
   const camPorts = cams ? portList.filter(([, v]) => v.role === 'cam').map(([p]) => p) : [];
   const offPorts = portList.filter(([, v]) => v.role === 'off' || (v.role === 'guest' && !guest) || (v.role === 'cam' && !cams)).map(([p]) => p);
   const v6 = spec.ros === '6';
+  const vpn = spec.vpn?.enabled && !v6 ? spec.vpn : null;
+  const vs = vpn ? subnet(vpn.address, vpn.prefix) : null;
+  const zt = spec.zt?.enabled && !v6 ? spec.zt : null;
+  const zs = zt ? ztSubnet(spec) : null;
   const wifiOn = spec.wifi.enabled && !!dev.wifi && !(v6 && dev.wifi === 'wifi');
   const limitsOn = spec.limits.length > 0;
   const failover = wans.length === 2;
@@ -276,6 +367,8 @@ export function build(spec, lang = 'en') {
   add('# --- Interface lists ---', '/interface list add name=WAN', '/interface list add name=LAN');
   if (guest) add('/interface list add name=GUEST');
   if (cams) add('/interface list add name=CAM');
+  if (vpn) add('/interface list add name=VPN');
+  if (zt) add('/interface list add name=ZT');
   add('');
 
   add('# --- LAN bridge ---', '/interface bridge add name=bridge-lan protocol-mode=rstp comment="LAN"');
@@ -403,6 +496,18 @@ export function build(spec, lang = 'en') {
   const dns = String(spec.dns || '').split(/[\s,]+/).filter((x) => ip2int(x) !== null);
   add('# --- DNS ---', `/ip dns set allow-remote-requests=yes${dns.length ? ` servers=${dns.join(',')}` : ''}`, '');
 
+  if (vpn) {
+    add('# --- WireGuard VPN (remote access) ---',
+      `/interface wireguard add name=wg-vpn listen-port=${vpn.port} mtu=${wgMtu(spec)} private-key=${q(vpn.serverPriv)} comment="VPN"`,
+      `/ip address add address=${vpn.address}/${vs.prefix} interface=wg-vpn comment="VPN"`,
+      '/interface list member add interface=wg-vpn list=VPN');
+    const clientIps = wgClientIps(spec);
+    (vpn.clients || []).forEach((cl, i) => {
+      if (clientIps[i]) add(`/interface wireguard peers add interface=wg-vpn public-key=${q(cl.pub)} preshared-key=${q(cl.psk)} allowed-address=${clientIps[i]}/32 responder=yes comment=${q(ascii(cl.name))}`);
+    });
+    add('');
+  }
+
   const bwPorts = portList.filter(([, v]) => v.down || v.up);
   if (bwPorts.length && dev.bw !== 'no') {
     add('# --- Port speed limits (switch chip, rx = upload from the device, tx = download to it) ---');
@@ -426,6 +531,16 @@ export function build(spec, lang = 'en') {
     'add chain=input action=accept in-interface-list=GUEST protocol=tcp dst-port=53 comment="guest DNS tcp"');
   if (cams) add('add chain=input action=accept in-interface-list=CAM protocol=udp dst-port=53,67 comment="cameras DNS and DHCP"');
   if (sec.portscan) add('add chain=input action=add-src-to-address-list address-list=port-scanners address-list-timeout=2w protocol=tcp psd=21,3s,3,1 connection-state=new in-interface-list=WAN comment="detect port scanners"');
+  if (vpn) {
+    add(`add chain=input action=accept protocol=udp dst-port=${vpn.port} in-interface-list=WAN comment="WireGuard VPN"`);
+    if (vpn.access === 'lan') add('add chain=input action=accept in-interface-list=VPN comment="accept from VPN"');
+    else {
+      add('add chain=input action=accept in-interface-list=VPN protocol=udp dst-port=53 comment="VPN DNS"');
+      add('add chain=input action=accept in-interface-list=VPN protocol=tcp dst-port=53 comment="VPN DNS tcp"');
+    }
+  }
+  if (zt) add('add chain=input action=accept protocol=udp dst-port=9993 in-interface-list=WAN comment="ZeroTier direct connections"',
+    'add chain=input action=accept in-interface-list=ZT comment="accept from ZeroTier"');
   add('add chain=input action=drop comment="drop everything else"');
   if (!limitsOn) add('add chain=forward action=fasttrack-connection connection-state=established,related comment="fasttrack"');
   add('add chain=forward action=accept connection-state=established,related,untracked comment="accept established"',
@@ -442,6 +557,11 @@ export function build(spec, lang = 'en') {
       : 'add chain=forward action=accept in-interface-list=CAM out-interface-list=WAN protocol=udp dst-port=123 comment="cameras: time sync only, no cloud"');
   }
   add('add chain=forward action=accept in-interface-list=LAN out-interface-list=WAN comment="LAN to internet"',
+    ...(vpn ? [
+      ...(vpn.access === 'lan' ? ['add chain=forward action=accept in-interface-list=VPN out-interface-list=LAN comment="VPN to LAN"'] : []),
+      'add chain=forward action=accept in-interface-list=VPN out-interface-list=WAN comment="VPN to internet"',
+    ] : []),
+    ...(zt && zt.access === 'lan' ? ['add chain=forward action=accept in-interface-list=ZT out-interface-list=LAN comment="ZeroTier to LAN"'] : []),
     ...(geoOn ? ['add chain=forward action=jump jump-target=geo connection-state=new connection-nat-state=dstnat in-interface-list=WAN comment="country filter for port forwards"'] : []),
     'add chain=forward action=accept connection-nat-state=dstnat comment="port forwards"',
     'add chain=forward action=drop comment="drop everything else"');
@@ -484,14 +604,90 @@ export function build(spec, lang = 'en') {
       '/system scheduler add name=geo-update start-time=startup interval=1d on-event="/system script run geo-update" comment="refresh country IP lists"', '');
     notes.push(sec.geoMode === 'allow' ? M.nGeoAllow(geoCc.join(', ')) : M.nGeoBlock(geoCc.join(', ')));
   }
+  const svcAddr = [lan.cidr, ...(vpn && vpn.access === 'lan' ? [vs.cidr] : []), ...(zt ? [zs.cidr] : [])].join(',');
   add('# --- Hardening ---',
     '/ip service set telnet,ftp,www,api,api-ssl disabled=yes',
-    `/ip service set winbox address=${lan.cidr}`,
-    `/ip service set ssh address=${lan.cidr}`,
+    `/ip service set winbox address=${svcAddr}`,
+    `/ip service set ssh address=${svcAddr}`,
     '/tool mac-server set allowed-interface-list=LAN',
     '/tool mac-server mac-winbox set allowed-interface-list=LAN',
     '/ip neighbor discovery-settings set discover-interface-list=LAN');
   if (spec.adminPassword) add(`/user set admin password=${q(spec.adminPassword)}`); else notes.push(M.nNoPass);
+  if (vpn) notes.push(M.nWg(vpn.endpoint, vpn.port, (vpn.clients || []).length));
+  if (zt) {
+    // last on purpose: without the zerotier package these lines fail, everything above is already applied
+    add('', '# --- ZeroTier (remote access) ---',
+      '# Needs the zerotier package (ARM/ARM64 only) and device-mode zerotier=yes: see the notes before applying.',
+      '/zerotier enable zt1',
+      `/zerotier interface add name=zt-remote network=${String(zt.network).trim().toLowerCase()} instance=zt1 allow-managed=yes allow-global=no allow-default=no comment="ZeroTier"`,
+      '/interface list member add interface=zt-remote list=ZT');
+    notes.push(M.nZt(String(zt.network).trim().toLowerCase(), zt.access === 'lan' ? lan.cidr : ''));
+  }
 
   return { errors: [], script: o.join('\n') + '\n', notes };
+}
+
+// ZeroTier subnet "a.b.c.d/nn" -> subnet() object or null
+export function ztSubnet(spec) {
+  const m = String(spec.zt?.subnet || '').trim().match(/^([\d.]+)\/(\d{1,2})$/);
+  return m ? subnet(m[1], +m[2]) : null;
+}
+
+const WG_KEY = /^[A-Za-z0-9+/]{42}[AEIMQUYcgkosw048]=$/;   // 32-byte base64 key
+export const isWgKey = (k) => WG_KEY.test(String(k || ''));
+// MTU of the tunnel: 1420 normally; 1412 when any enabled WAN is PPPoE (1492 - 80 bytes WireGuard overhead)
+export function wgMtu(spec) {
+  const wans = [spec.wan1, ...(spec.wan2?.enabled ? [spec.wan2] : [])];
+  return wans.some((w) => w.type === 'pppoe') ? 1412 : 1420;
+}
+// tunnel IP of each client, in order: hosts of the VPN subnet from first upwards, skipping the router's own vpn.address
+export function wgClientIps(spec) {
+  const vs = subnet(spec.vpn?.address, spec.vpn?.prefix);
+  if (!vs) return (spec.vpn?.clients || []).map(() => null);
+  const routerIp = ip2int(spec.vpn.address);
+  const out = [];
+  let cur = vs.first;
+  for (const _ of (spec.vpn.clients || [])) {
+    while (cur <= vs.last && cur === routerIp) cur++;
+    if (cur > vs.last) { out.push(null); continue; }
+    out.push(int2ip(cur));
+    cur++;
+  }
+  return out;
+}
+// WireGuard client config text (.conf) for client index i
+export function wgClientConf(spec, i) {
+  const vpn = spec.vpn;
+  if (!vpn || !vpn.clients || !vpn.clients[i]) return '';
+  const cl = vpn.clients[i];
+  const ip = wgClientIps(spec)[i];
+  if (!ip) return '';
+  const vs = subnet(vpn.address, vpn.prefix);
+  let allowed;
+  if (vpn.fullTunnel) {
+    allowed = '0.0.0.0/0, ::/0';
+  } else {
+    const parts = [vs.cidr];
+    if (vpn.access === 'lan') {
+      const lan = subnet(spec.lan.address, spec.lan.prefix);
+      if (lan) parts.push(lan.cidr);
+    }
+    allowed = parts.join(', ');
+  }
+  return [
+    '[Interface]',
+    `# ${ascii(cl.name)}`,
+    `PrivateKey = ${cl.priv}`,
+    `Address = ${ip}/32`,
+    `DNS = ${vpn.address}`,
+    `MTU = ${wgMtu(spec)}`,
+    '',
+    '[Peer]',
+    `# ${ascii(spec.identity) || 'MikroTik'} (MikrotikEasy)`,
+    `PublicKey = ${vpn.serverPub}`,
+    `PresharedKey = ${cl.psk}`,
+    `AllowedIPs = ${allowed}`,
+    `Endpoint = ${vpn.endpoint}:${vpn.port}`,
+    'PersistentKeepalive = 25',
+  ].join('\n') + '\n';
 }

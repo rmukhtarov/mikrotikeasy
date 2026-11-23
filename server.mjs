@@ -3,6 +3,7 @@
 import http from 'node:http';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, extname, dirname } from 'node:path';
+import { generateKeyPairSync } from 'node:crypto';
 import { systemPrompt, fixPrompt, lint, sanitize, DEVICES } from './prompts.mjs';
 import { SCHEMA } from './schema.mjs';
 import { createSettings } from './settings.mjs';
@@ -211,6 +212,13 @@ const server = http.createServer(async (req, res) => {
       const issues = lint(String(p.script || ''), { mode: 'generate', deviceId: DEVICES[p.deviceId] ? p.deviceId : 'any', ros }, '');
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ issues, ros, schema: ros === '6' ? null : SCHEMA?.version || null }));
+    }
+    if (req.method === 'POST' && req.url === '/api/wg-keys') {
+      // fallback for browsers without WebCrypto X25519 (e.g. the app opened over plain http on the LAN)
+      const { publicKey, privateKey } = generateKeyPairSync('x25519');
+      const raw = (k, type) => k.export({ format: 'der', type }).subarray(-32).toString('base64');
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ priv: raw(privateKey, 'pkcs8'), pub: raw(publicKey, 'spki') }));
     }
     if (req.method === 'GET' && req.url.startsWith('/api/geo-status')) {
       const cc = [...new Set(String(new URL(req.url, 'http://x').searchParams.get('cc') || '').toUpperCase().split(/[\s,;]+/).filter((c) => /^[A-Z]{2}$/.test(c)))].slice(0, 30);
