@@ -57,7 +57,7 @@ const base = (dev = 'rb3011') => {
   s.identity = 'Office'; s.adminPassword = 'x';
   return s;
 };
-const label = { rb3011: 'RB3011UiAS', 'hap-ac': 'hAP ac2 / ac3', 'lte-builtin': 'hAP ac3 LTE6' };
+const label = { rb3011: 'RB3011UiAS', rb5009: 'RB5009UG+S+IN', 'hap-ac': 'hAP ac2 / ac3', 'lte-builtin': 'hAP ac3 LTE6' };
 
 const scenes = {
   // everything together
@@ -68,7 +68,14 @@ const scenes = {
     s.ports.ether4 = { role: 'cam' }; s.ports.ether5 = { role: 'guest' };
     s.forwards = [{ name: 'nvr', proto: 'tcp', extPort: '8443', ip: '192.168.50.10', intPort: '443' }];
     s.security.geoMode = 'allow'; s.security.geoCountries = 'AZ, TR';
+    s.vpn.enabled = true; s.zt.enabled = true;
     return [s, 6, { down: false }, label['hap-ac'], 'The whole network on one live picture'];
+  })(),
+  // remote access: WireGuard into the home network, ZeroTier to the router only
+  'remote': (() => {
+    const s = base('rb5009');
+    s.vpn.enabled = true; s.zt.enabled = true; s.zt.access = 'router';
+    return [s, 5, { down: false }, label.rb5009, 'Remote access: WireGuard and ZeroTier tunnels from phones and laptops'];
   })(),
   // second WAN, main line cut: traffic on the backup (LTE)
   'failover': (() => {

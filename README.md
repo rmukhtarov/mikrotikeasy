@@ -69,6 +69,20 @@ schema and server-side lint rules.
   countries. The lists come from iwik.org; the router refreshes them daily and checks them before
   importing, and the app shows how fresh each list is.
 
+### Remote access: WireGuard and ZeroTier
+
+<p align="center"><img src="docs/diagram-remote.svg" alt="Remote devices reach the router through WireGuard and ZeroTier tunnels" width="820"></p>
+
+- **WireGuard VPN (RouterOS 7):** phones and laptops connect to the router from anywhere. You choose
+  whether they reach the home network and the internet or only the internet, and whether all their
+  traffic goes through the tunnel. The keys are made in your browser, and the result page gives a `.conf`
+  file and a QR code for each device, ready for the official WireGuard app. The router needs a static
+  public IP or a DDNS name.
+- **ZeroTier (RouterOS 7, ARM/ARM64 models):** the router joins your ZeroTier Central network, so it
+  works without a public IP, behind CGNAT or LTE. ZeroTier devices reach the router only or the home
+  network too. The option is offered only on models that run the zerotier package (hAP ax, hAP ac2/ac3,
+  RB3011, RB4011, RB5009), and the notes list the package, device-mode and ZeroTier Central steps.
+
 ### AI assistant (optional)
 
 - **What it does:** turns a free-text description into a RouterOS v6 or v7 script, or reviews a pasted
@@ -119,7 +133,7 @@ Finally it waits for the health check. Open `http://<host>:3090` when it finishe
 | Build from source | `docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build` |
 | Offline host | Put `mikrotikeasy-image-<version>.tar.gz` from the release next to `install.sh`, then run `sh install.sh` |
 | Portainer or Arcane | Paste `docker-compose.yml` and add the `.env` values as stack variables. Set `DATA_DIR` explicitly, because Portainer has no `$USER`. |
-| Plain Docker | `docker run -d --name mikrotikeasy -p 3090:3090 -v /srv/mikrotikeasy:/data --env-file .env ghcr.io/rmukhtarov/mikrotikeasy:1.1.0` |
+| Plain Docker | `docker run -d --name mikrotikeasy -p 3090:3090 -v /srv/mikrotikeasy:/data --env-file .env ghcr.io/rmukhtarov/mikrotikeasy:1.2.0` |
 | Without Docker (Node.js 18 or newer, no npm packages) | `cp .env.example .env && node server.mjs` |
 
 ## Windows (single .exe, no installation)
@@ -149,7 +163,7 @@ architecture, checked by SHA-256.
 | `LLM_THINKING` | false | Keep this false for Qwen3-style models. With thinking on, one request can run for minutes. |
 | `LLM_MAX_TOKENS`, `LLM_TIMEOUT_MS`, `FIX_ROUNDS` | 8000, 300000, 2 | Generation limits |
 | `SETTINGS_SECRET` | random file in the data folder | Encryption secret for the API key saved from Settings |
-| `MIKROTIKEASY_TAG` | 1.1.0 | Image tag to run |
+| `MIKROTIKEASY_TAG` | 1.2.0 | Image tag to run |
 | `APP_PORT` | 3090 | Port on the host |
 | `DATA_DIR` | `/home/$USER/docker/mikrotikeasy/data` | Mistake memory of the AI assistant |
 | `NET_SUBNET`, `NET_GATEWAY` | 192.168.62.0/24, .1 | Docker network. Change it if this range is already in use. |
@@ -170,7 +184,7 @@ Always test a generated script on a lab device before production, and keep an `/
 
 ## Release bundle
 
-`bash tools/package.sh 1.1.0` writes `dist/mikrotikeasy-1.1.0.tar.gz`. Pushing a `v*` tag builds the
+`bash tools/package.sh 1.2.0` writes `dist/mikrotikeasy-1.2.0.tar.gz`. Pushing a `v*` tag builds the
 multi-arch image (linux/amd64 and linux/arm64) and publishes it to GHCR (`.github/workflows/docker.yml`).
 
 ## Credits and notices
@@ -178,6 +192,8 @@ multi-arch image (linux/amd64 and linux/arm64) and publishes it to GHCR (`.githu
 - Country IP lists come from [iwik.org/ipcountry](https://www.iwik.org/ipcountry/), based on MaxMind
   GeoLite2 data ([GeoLite2 EULA](https://www.maxmind.com/en/geolite2/eula)).
 - Wordmark font: a subset of Exo 2 (SIL Open Font License 1.1, see `public/fonts/OFL.txt`).
+- QR codes: [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) by Kazuhiko Arase (MIT),
+  in `public/vendor/qrcode.js`. QR Code is a registered trademark of DENSO WAVE INCORPORATED.
 - MikroTik and RouterOS are trademarks of MikroTik SIA. This project is independent and is not affiliated
   with or endorsed by MikroTik.
 - Built with [Claude Code](https://claude.com/claude-code).

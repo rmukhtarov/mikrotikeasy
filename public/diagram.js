@@ -100,7 +100,8 @@ export function renderDiagram(spec, lang, step, sim, label = '') {
   const H = guest ? gy + 46 : camsOn ? camY + 52 : 300;
   const SHX = RX - 36;
   const REMY = (two ? wy[1] : wy[0]) + 128;          // remote devices: bottom-left, under the internet cloud(s)
-  const HH = tuns.length ? Math.max(H, REMY + 62) : H;
+  // tunnel labels sit in the left column under the remote devices, where no other line runs
+  const HH = tuns.length ? Math.max(H, REMY + 70 + tuns.length * 16) : H;
 
   // port names for the "Ports" step
   const wanPort = (w) => (w.type === 'lte' ? (w.lteIf || 'lte1') : w.port);
@@ -184,7 +185,7 @@ export function renderDiagram(spec, lang, step, sim, label = '') {
       const path = tn.lan ? `${toRouter} H${RX + RW / 2} V${RCY} H${BUSX} V${lanY[0]} H${DX - 22}` : `${toRouter} H${RX + RW / 2}`;
       rm += `<path class="dg-line dg-tun dg-tun-${tn.k}" d="${toRouter}"/>`;
       rm += dot(`dg-${tn.k}`, path, tn.lan ? 4.6 : 3.2, 0.5 + i * 1.1);
-      rm += `<text class="dg-t dg-s dg-tunt-${tn.k}" x="${CX + 150}" y="${REMY - 16 + off * 1.6}">🔒 ${esc(tn.name)}: ${esc(tn.lan ? t.tunLan : t.tunRouter)}</text>`;
+      rm += `<text class="dg-t dg-s dg-tunt-${tn.k}" x="${CX - 66}" y="${REMY + 72 + off}">🔒 ${esc(tn.name)}: ${esc(tn.lan ? t.tunLan : t.tunRouter)}</text>`;
     });
     rm += `<g class="dg-ico">${ICON.pc(CX - 22, REMY)}${ICON.phone(CX + 24, REMY)}</g>`;
     rm += `<text class="dg-t dg-b" x="${CX}" y="${REMY + 36}" text-anchor="middle">${esc(t.remote)}</text>`;

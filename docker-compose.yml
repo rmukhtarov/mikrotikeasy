@@ -4,7 +4,7 @@
 # Settings come from .env next to this file (or the stack's environment variables).
 services:
   mikrotikeasy:
-    image: ghcr.io/rmukhtarov/mikrotikeasy:${MIKROTIKEASY_TAG:-1.1.0}
+    image: ghcr.io/rmukhtarov/mikrotikeasy:${MIKROTIKEASY_TAG:-1.2.0}
     container_name: mikrotikeasy
     restart: unless-stopped
     environment:
