@@ -104,6 +104,12 @@ const scenes = {
     s.security.geoMode = 'allow'; s.security.geoCountries = 'AZ';
     return [s, 5, { down: false }, label.rb3011, 'Protection: unwanted connections stop at the shield, the allowed forward gets through'];
   })(),
+  // office A (this router) linked with office B over WireGuard
+  'offices': (() => {
+    const s = base('rb3011');
+    Object.assign(s.s2s, { enabled: true, name: 'Branch', remoteLan: '192.168.20.0/24', localEndpoint: 'office.example.com', inMode: 'list', outMode: 'all' });
+    return [s, 5, { down: false }, label.rb3011, 'Office A and office B: encrypted WireGuard tunnel, permissions per direction'];
+  })(),
 };
 
 for (const [name, args] of Object.entries(scenes)) {

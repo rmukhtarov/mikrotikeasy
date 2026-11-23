@@ -1,6 +1,6 @@
 // Live, animated picture of what the Master is about to configure.
 // Plain words next to every element, so nobody has to know what a router symbol means.
-import { DEVICE_PORTS, geoList } from './wizard-core.js';
+import { DEVICE_PORTS, geoList, subnet } from './wizard-core.js';
 
 const DG = {
   az: {
@@ -13,6 +13,7 @@ const DG = {
     limit: (n) => `${n} cihaz/qrupda sürət limiti`, wifi: 'WiFi', cams: 'Kameralar', off: 'söndürülüb (port bağlı)', pmTitle: 'Port xəritəsi: hansı kabel hara', clickGo: 'klikləyin, bu addım açılsın', clickHint: 'Sxemdəki istənilən hissəyə və ya nömrəyə klikləyin: uyğun addım açılır.', roleLan: 'daxili şəbəkə', roleGuest: 'qonaq şəbəkəsi', roleCam: 'kamera şəbəkəsi', camGroup: 'Kameralar', camNote: 'Kameralar LAN-a çıxa bilmir', camInetOn: 'internet var', camInetOff: 'internet yox (yalnız saat)',
     focus: ['Router: model və ad', 'İnternet: provayder/lər və qoşulma', 'Daxili şəbəkə: ünvanlar və cihazlar', 'Portlar: kabel qoşulmaları', 'WiFi, qonaq və kamera şəbəkələri', 'Qoruma, xaricdən giriş və limitlər', 'Hamısı birlikdə'],
     legend: ['Sizin internet trafiki', 'Bloklanan kənar girişlər', 'İcazə verdiyiniz xaricdən giriş'],
+    s2sIn: 'oradan bura', s2sOut: 'buradan ora', s2sAllW: 'bütün şəbəkə', s2sSelW: 'seçilmiş cihazlar',
     remote: 'Uzaqdan cihazlar', remoteSub: 'telefon, noutbuk', tunLan: 'ev şəbəkəsinə', tunRouter: 'yalnız router-ə', legRemote: 'Uzaqdan giriş (şifrəli tunel)',
   },
   ru: {
@@ -25,6 +26,7 @@ const DG = {
     limit: (n) => `ограничение скорости: ${n}`, wifi: 'WiFi', cams: 'Камеры', off: 'выключен (порт закрыт)', pmTitle: 'Карта портов: какой кабель куда', clickGo: 'нажмите, чтобы открыть этот шаг', clickHint: 'Нажмите на любую часть схемы или номер: откроется нужный шаг.', roleLan: 'локальная сеть', roleGuest: 'гостевая сеть', roleCam: 'сеть камер', camGroup: 'Камеры', camNote: 'Камеры не видят LAN', camInetOn: 'интернет: есть', camInetOff: 'интернет: нет (только время)',
     focus: ['Роутер: модель и имя', 'Интернет: провайдер(ы) и подключение', 'Локальная сеть: адреса и устройства', 'Порты: подключение кабелей', 'WiFi, гостевая сеть и сеть камер', 'Защита, доступ извне и лимиты', 'Всё вместе'],
     legend: ['Ваш интернет-трафик', 'Заблокированные подключения извне', 'Разрешённый вами доступ извне'],
+    s2sIn: 'оттуда сюда', s2sOut: 'отсюда туда', s2sAllW: 'вся сеть', s2sSelW: 'выбранные устройства',
     remote: 'Удалённые устройства', remoteSub: 'телефон, ноутбук', tunLan: 'в домашнюю сеть', tunRouter: 'только к роутеру', legRemote: 'Удалённый доступ (шифрованный туннель)',
   },
   en: {
@@ -37,6 +39,7 @@ const DG = {
     limit: (n) => `speed limit on ${n}`, wifi: 'WiFi', cams: 'Cameras', off: 'disabled (port closed)', pmTitle: 'Port map: which cable goes where', clickGo: 'click to open this step', clickHint: 'Click any part of the picture or a number to open that step.', roleLan: 'local network', roleGuest: 'guest network', roleCam: 'camera network', camGroup: 'Cameras', camNote: 'Cameras cannot reach the LAN', camInetOn: 'internet: yes', camInetOff: 'internet: no (time only)',
     focus: ['Router: model and name', 'Internet: provider(s) and connection', 'Local network: addresses and devices', 'Ports: cable connections', 'WiFi, guest and camera networks', 'Protection, access from outside and limits', 'Everything together'],
     legend: ['Your internet traffic', 'Blocked connections from outside', 'Access from outside that you allowed'],
+    s2sIn: 'from there', s2sOut: 'from here', s2sAllW: 'whole network', s2sSelW: 'selected devices',
     remote: 'Remote devices', remoteSub: 'phone, laptop', tunLan: 'to the home network', tunRouter: 'router only', legRemote: 'Remote access (encrypted tunnel)',
   },
 };
@@ -54,6 +57,7 @@ const ICON = {
   pc: (x, y) => `<rect x="${x - 16}" y="${y - 12}" width="32" height="21" rx="3"/><path d="M${x - 21} ${y + 13}h42" stroke-width="3" stroke-linecap="round"/>`,
   phone: (x, y) => `<rect x="${x - 8}" y="${y - 15}" width="16" height="29" rx="4"/><circle cx="${x}" cy="${y + 9}" r="1.6" class="dg-fill"/>`,
   tv: (x, y) => `<rect x="${x - 18}" y="${y - 13}" width="36" height="22" rx="3"/><path d="M${x - 8} ${y + 14}h16"/>`,
+  office: (x, y) => `<rect x="${x - 15}" y="${y - 17}" width="30" height="31" rx="2"/><path d="M${x - 9} ${y - 10}h5M${x + 4} ${y - 10}h5M${x - 9} ${y - 3}h5M${x + 4} ${y - 3}h5M${x - 3} ${y + 14}v-7h6v7"/>`,
   cam: (x, y) => `<rect x="${x - 17}" y="${y - 9}" width="26" height="17" rx="4"/><path d="M${x + 9} ${y - 3}l9-5v15l-9-5z"/>`,
 };
 
@@ -76,9 +80,9 @@ export function renderDiagram(spec, lang, step, sim, label = '') {
     ...(spec.zt?.enabled && spec.ros !== '6' && dev.zt ? [{ k: 'zt', name: 'ZeroTier', lan: spec.zt.access === 'lan' }] : []),
   ];
   // every step lights up its own part of the picture; the rest fades back
-  const ACTIVE = [['router'], ['wan', 'flow'], ['lan', 'flow'], ['ports', 'lan'], ['wifi', 'guest', 'cams'], ['sec', 'lim', 'remote'], null][step] || null;
+  const ACTIVE = [['router'], ['wan', 'flow'], ['lan', 'flow'], ['ports', 'lan'], ['wifi', 'guest', 'cams'], ['sec', 'lim', 'remote', 's2s'], null][step] || null;
   // every part is clickable and opens its step; the active one pulses (nothing is greyed out)
-  const GO = { router: 0, wan: 1, lan: 2, ports: 3, wifi: 4, guest: 4, cams: 4, sec: 5, remote: 5 };
+  const GO = { router: 0, wan: 1, lan: 2, ports: 3, wifi: 4, guest: 4, cams: 4, sec: 5, remote: 5, s2s: 5 };
   const part = (name, body) => {
     const go = GO[name], on = ACTIVE && ACTIVE.includes(name) && go !== undefined;
     const attrs = go === undefined ? '' : ` data-dg-go="${go}" tabindex="0" role="button" aria-label="${esc(t.focus[go])}"`;
@@ -101,7 +105,9 @@ export function renderDiagram(spec, lang, step, sim, label = '') {
   const SHX = RX - 36;
   const REMY = (two ? wy[1] : wy[0]) + 128;          // remote devices: bottom-left, under the internet cloud(s)
   // tunnel labels sit in the left column under the remote devices, where no other line runs
-  const HH = tuns.length ? Math.max(H, REMY + 70 + tuns.length * 16) : H;
+  const s2sOn = !!spec.s2s?.enabled && spec.ros !== '6';
+  const OFY = tuns.length ? REMY + 100 + tuns.length * 16 : REMY;    // the other office: under the remote devices
+  const HH = Math.max(H, two ? 330 : 0, tuns.length ? REMY + 70 + tuns.length * 16 : 0, s2sOn ? OFY + 92 : 0);
 
   // port names for the "Ports" step
   const wanPort = (w) => (w.type === 'lte' ? (w.lteIf || 'lte1') : w.port);
@@ -193,6 +199,24 @@ export function renderDiagram(spec, lang, step, sim, label = '') {
     s += part('remote', rm);
   }
 
+  // ---- link to another office: tunnel into the router; traffic both ways
+  if (s2sOn) {
+    const ss = spec.s2s;
+    const ent = `M${CX + 34} ${OFY - 6} C ${CX + 170} ${OFY - 6}, ${RX - 20} ${RY + RH + 70}, ${RX + 22} ${RY + RH - 2}`;
+    let of = `<path class="dg-line dg-tun dg-tun-s2s" d="${ent}"/>`;
+    // from the other office: the whole network goes on into the LAN, selected devices stop at the router's filter
+    of += dot('dg-s2s', ss.inMode === 'list' ? ent : `${ent} H${RX + RW / 2} V${RCY} H${BUSX} V${lanY[1]} H${DX - 22}`, ss.inMode === 'list' ? 2.8 : 4.6, 0.3);
+    // from here to the other office
+    of += dot('dg-s2s', `M${DX - 22} ${lanY[2]} H${BUSX} V${RCY} H${RX + RW / 2} L${RX + 22} ${RY + RH - 2} C ${RX - 20} ${RY + RH + 70}, ${CX + 170} ${OFY - 6}, ${CX + 34} ${OFY - 6}`, 4.6, 2.4);
+    of += `<g class="dg-ico">${ICON.office(CX, OFY)}</g>`;
+    of += `<text class="dg-t dg-b" x="${CX}" y="${OFY + 34}" text-anchor="middle">B: ${esc(ss.name || '')}</text>`;
+    of += `<text class="dg-t dg-s" x="${CX}" y="${OFY + 49}" text-anchor="middle">LAN ${esc(ss.remoteLan || '')}</text>`;
+    const mode = (m) => (m === 'list' ? t.s2sSelW : t.s2sAllW);
+    of += `<text class="dg-t dg-s dg-s2st" x="${CX - 66}" y="${OFY + 68}">🔒 ${esc(t.s2sIn)}: ${esc(mode(ss.inMode))}</text>`;
+    of += `<text class="dg-t dg-s dg-s2st" x="${CX - 66}" y="${OFY + 84}">🔒 ${esc(t.s2sOut)}: ${esc(mode(ss.outMode))}</text>`;
+    s += part('s2s', of);
+  }
+
   // ---- router: a plain box with words, not a symbol
   let rt = `<rect x="${RX}" y="${RY}" width="${RW}" height="${RH}" rx="14"/>`;
   rt += `<text class="dg-rt" x="${RX + RW / 2}" y="${RY + 34}" text-anchor="middle">${esc(t.router)}</text>`;
@@ -207,7 +231,7 @@ export function renderDiagram(spec, lang, step, sim, label = '') {
 
   // ---- LAN devices with words
   let ld = `<text class="dg-t dg-b" x="${DX + 50}" y="${lanY[0] - 34}" text-anchor="middle">${esc(t.home)}</text>`;
-  ld += `<text class="dg-t dg-s" x="${DX + 50}" y="${lanY[0] - 20}" text-anchor="middle">${esc(`${spec.lan?.address || ''}/${spec.lan?.prefix || ''}`)}</text>`;
+  ld += `<text class="dg-t dg-s" x="${DX + 50}" y="${lanY[0] - 20}" text-anchor="middle">${esc(subnet(spec.lan?.address, spec.lan?.prefix)?.cidr || `${spec.lan?.address || ''}/${spec.lan?.prefix || ''}`)}</text>`;
   lanDevs.forEach(([k, name], i) => { ld += `<g class="dg-ico">${ICON[k](DX, lanY[i])}</g><text class="dg-t" x="${DX + 30}" y="${lanY[i] + 5}">${esc(name)}</text>`; });
   s += part('lan', ld);
 
@@ -232,7 +256,7 @@ export function renderDiagram(spec, lang, step, sim, label = '') {
       + `<g class="dg-ico">${ICON.phone(DX, gy)}</g><text class="dg-t" x="${DX + 30}" y="${gy + 5}">${esc(t.guestPhone)}</text>`);
   }
   // numbered markers: where each step lives on the picture
-  s += badge(0, RX + RW - 4, RY + 4) + badge(1, CX + 54, wy[0] - 30) + badge(2, DX + 150, lanY[0] - 46) + badge(3, RX + RW + 14, RCY + 24);
+  s += badge(0, RX + RW - 4, RY + 4) + badge(1, CX + 54, wy[0] - 30) + badge(2, BUSX - 24, lanY[0] - 24) + badge(3, RX + RW + 14, RCY + 24);
   if (wifi) s += badge(4, RX + RW + 30, RY - 38); else if (guest) s += badge(4, RX + RW / 2 - 18, gy - 18); else if (camsOn) s += badge(4, CAMX - 18, camY - 18);
   s += badge(5, SHX - 28, RCY - 30);
   s += '</svg>';

@@ -110,6 +110,33 @@ const MSG = {
     ztArch: 'Seçilən modeldə ZeroTier işləmir: paket yalnız ARM/ARM64 router-lər üçündür. ZeroTier hAP ax, hAP ac2/ac3, RB3011, RB4011 və RB5009 üçün açılır.',
     ztNet: 'ZeroTier: şəbəkə ID-si 16 simvollu olmalıdır (0-9, a-f), məs. 1d71939404912b40.',
     ztSub: 'ZeroTier: şəbəkə aralığını a.b.c.d/nn şəklində yazın, məs. 10.147.17.0/24.',
+    lkName: 'Hər iki ofisin adını yazın.', lkSameName: 'Ofislərin adları fərqli olmalıdır: tunel interfeysləri ad əsasında yaradılır.',
+    lkEndpoint: 'Ən azı bir ofisin router-inin public IP-si və ya DDNS adı lazımdır.', lkPort: 'WireGuard portu 1-65535 arası olmalıdır.',
+    lkLan: (x) => `${x} ofisinin LAN şəbəkəsi düzgün deyil (məs. 192.168.20.0/24; bir neçəsi vergüllə).`,
+    lkOverlap: 'A və B ofislərinin LAN şəbəkələri üst-üstə düşür. İki ofisdə eyni şəbəkə ola bilməz: birini dəyişin (məs. A 192.168.88.0/24, B 192.168.20.0/24).',
+    lkIp: (n, x) => `"${n}": IP ${x} ofisinin LAN şəbəkəsində deyil.`,
+    lkApply: (a, b) => `A skriptini "${a}" router-ində, B skriptini "${b}" router-ində tətbiq edin (Winbox → New Terminal). Skriptlər yalnız bağlantını əlavə edir, router-lərin qalan ayarlarına toxunmur.`,
+    lkCheck: (a, b) => `Yoxlamaq: /interface wireguard peers print (last-handshake bir neçə saniyə olmalıdır); A-dan /ping ${b}, B-dən /ping ${a}.`,
+    lkWho: (init, srv, port) => `Bağlantını "${init}" başladır; "${srv}" router-inin public ünvanında UDP ${port} açıq olmalıdır (provayder bloklamamalıdır).`,
+    lkSafe: 'İşlək (prod) router-də: Winbox-da Safe Mode (Ctrl+X) açın, sonra skripti yapışdırın; bağlantı kəsilsə, router bütün dəyişiklikləri özü geri qaytarır. Skript əvvəlcə yoxlayır: düzgün router-dirmi (öz LAN-ı varmı), RouterOS 7-dirmi, port, interfeys adı, qarşı ofisin şəbəkəsi və tunel şəbəkəsi bu router-də artıq istifadə olunurmu. Problem varsa, səbəbi yazır və HEÇ NƏ dəyişmir. Firewall qaydaları yalnız tunelə aiddir, digər trafikə toxunmur. Yenidən işlətmək bağlantını yeniləyir; "Silmə skripti" onu tamamilə çıxarır.',
+    lkRos7: 'Hər iki router-də RouterOS 7 olmalıdır (WireGuard). Tətbiqdən əvvəl hər iki router-də /export ilə ehtiyat nüsxə götürün.',
+    s2sV6: 'Ofislər arası bağlantı WireGuard ilə qurulur və hər iki router-də RouterOS 7 tələb edir.',
+    s2sName: 'Qarşı ofisin adını yazın.',
+    s2sEndpoint: 'Ən azı bir router-in public IP-si və ya DDNS adı lazımdır: ya bu router-in, ya qarşı router-in.',
+    s2sEndpointBad: 'Public ünvan düzgün deyil: IP və ya domen adı yazın (məs. 85.132.10.20 və ya ofis.example.com).',
+    s2sPort: 'Ofislər arası bağlantının portu 1-65535 arası olmalı və uzaqdan giriş (VPN) portundan fərqli olmalıdır.',
+    s2sTunnel: 'Tunel şəbəkəsi /30 olmalıdır (məs. 10.255.255.0/30) və bu router-in şəbəkələri ilə üst-üstə düşməməlidir.',
+    s2sRemoteLan: 'Qarşı ofisin şəbəkəsi düzgün deyil (məs. 192.168.20.0/24; bir neçəsi vergüllə).',
+    s2sOverlap: 'Qarşı ofisin şəbəkəsi bu router-in şəbəkələri ilə üst-üstə düşür. İki ofisdə eyni şəbəkə ola bilməz: birinin ünvanını dəyişin (məs. 192.168.88.0/24 və 192.168.20.0/24).',
+    s2sInIp: (n) => `"${n}": IP bu ofisin şəbəkəsində (LAN və ya kamera) deyil.`,
+    s2sOutIp: (n) => `"${n}": IP qarşı ofisin şəbəkəsində deyil.`,
+    s2sPorts: (n) => `"${n}": portları rəqəm və vergüllə yazın (məs. 8080,8443).`,
+    s2sMac: (n) => `"${n}": MAC ünvanı düzgün deyil (məs. AA:BB:CC:DD:EE:FF).`,
+    s2sEmptyList: 'Seçilmiş cihazlar rejimində ən azı bir cihaz əlavə edin.',
+    nS2s: (name, ip) => `Ofislər arası bağlantı: aşağıdakı İKİNCİ skripti "${name}" router-ində tətbiq edin. O, yalnız bağlantını əlavə edir, həmin router-in qalan ayarlarına toxunmur. Yoxlamaq: /interface wireguard peers print (last-handshake bir neçə saniyə olmalıdır) və /ping ${ip}.`,
+    nS2sWho: (side, port) => `Bağlantını ${side} başladır; qarşı tərəfin public ünvanında UDP ${port} portu açıq olmalıdır (provayder bloklamamalıdır).`,
+    nS2sBoth: 'Hər iki router-in public ünvanı yazılıb: bağlantını hansı tərəf əvvəl başlasa, o qurur.',
+    sideHere: 'bu router', sideThere: 'qarşı router',
     ztOverlap: 'ZeroTier şəbəkəsi LAN, qonaq, kamera və ya WireGuard şəbəkəsi ilə üst-üstə düşür.',
     nZt: (id, lanCidr) => `ZeroTier, tətbiqdən ƏVVƏL: 1) mikrotik.com/download-dan modelinizin "Extra packages" arxivini yükləyin, zerotier-*.npk faylını Winbox → Files-a atın və router-i yenidən başladın. 2) /system device-mode print: zerotier: no görünürsə, /system device-mode update zerotier=yes işlədin və 5 dəqiqə ərzində router-in reset/mode düyməsini basın (və ya elektrikdən çıxarıb taxın). Skriptin ZeroTier hissəsi ən sondadır: paket yoxdursa, yalnız o hissə alınmır. Tətbiqdən SONRA: my.zerotier.com → ${id} şəbəkəsi → Members bölməsində router-ə icazə verin (Auth)${lanCidr ? `, Managed Routes-a ${lanCidr} via <router-in ZeroTier IP-si> əlavə edin (IP: /ip address print where interface=zt-remote)` : ''}. Telefon və noutbuklara ZeroTier One tətbiqini quraşdırın, ${id} şəbəkəsinə qoşun və onlara da Members-də icazə verin. Yoxlamaq: /zerotier interface print, /zerotier peer print.`,
   },
@@ -148,6 +175,33 @@ const MSG = {
     ztArch: 'На выбранной модели ZeroTier не работает: пакет есть только для роутеров ARM/ARM64. ZeroTier доступен для hAP ax, hAP ac2/ac3, RB3011, RB4011 и RB5009.',
     ztNet: 'ZeroTier: ID сети — 16 символов (0-9, a-f), например 1d71939404912b40.',
     ztSub: 'ZeroTier: укажите диапазон сети в виде a.b.c.d/nn, например 10.147.17.0/24.',
+    lkName: 'Укажите названия обоих офисов.', lkSameName: 'Названия офисов должны различаться: по ним называются интерфейсы туннеля.',
+    lkEndpoint: 'Нужен публичный IP или DDNS роутера хотя бы одного офиса.', lkPort: 'Порт WireGuard должен быть 1-65535.',
+    lkLan: (x) => `LAN-сеть офиса ${x} указана неверно (напр. 192.168.20.0/24; несколько через запятую).`,
+    lkOverlap: 'LAN-сети офисов A и B пересекаются. В двух офисах не может быть одной сети: измените одну (напр. A 192.168.88.0/24, B 192.168.20.0/24).',
+    lkIp: (n, x) => `«${n}»: IP не в LAN-сети офиса ${x}.`,
+    lkApply: (a, b) => `Скрипт A примените на роутере «${a}», скрипт B — на роутере «${b}» (Winbox → New Terminal). Скрипты только добавляют связь и не меняют остальные настройки роутеров.`,
+    lkCheck: (a, b) => `Проверка: /interface wireguard peers print (last-handshake — несколько секунд); из A /ping ${b}, из B /ping ${a}.`,
+    lkWho: (init, srv, port) => `Связь начинает «${init}»; на публичном адресе роутера «${srv}» должен быть открыт UDP ${port} (провайдер не должен блокировать).`,
+    lkSafe: 'На рабочем (prod) роутере: включите Safe Mode в Winbox (Ctrl+X) и вставьте скрипт; при обрыве связи роутер сам откатит все изменения. Скрипт сначала проверяет: тот ли это роутер (есть ли его LAN), RouterOS 7 ли это, не заняты ли порт, имя интерфейса, сеть другого офиса и сеть туннеля. Если есть проблема, он пишет причину и НИЧЕГО не меняет. Правила firewall касаются только туннеля и не трогают остальной трафик. Повторный запуск обновляет связь; «Скрипт удаления» убирает её полностью.',
+    lkRos7: 'На обоих роутерах нужна RouterOS 7 (WireGuard). Перед применением сделайте резервную копию /export на обоих роутерах.',
+    s2sV6: 'Связь между офисами строится на WireGuard и требует RouterOS 7 на обоих роутерах.',
+    s2sName: 'Укажите название другого офиса.',
+    s2sEndpoint: 'Нужен публичный IP или DDNS хотя бы одного роутера: этого или другого.',
+    s2sEndpointBad: 'Публичный адрес неверный: укажите IP или доменное имя (напр. 85.132.10.20 или office.example.com).',
+    s2sPort: 'Порт связи между офисами должен быть 1-65535 и отличаться от порта удалённого доступа (VPN).',
+    s2sTunnel: 'Сеть туннеля должна быть /30 (напр. 10.255.255.0/30) и не пересекаться с сетями этого роутера.',
+    s2sRemoteLan: 'Сеть другого офиса указана неверно (напр. 192.168.20.0/24; несколько через запятую).',
+    s2sOverlap: 'Сеть другого офиса пересекается с сетями этого роутера. В двух офисах не может быть одинаковой сети: измените адрес одного из них (напр. 192.168.88.0/24 и 192.168.20.0/24).',
+    s2sInIp: (n) => `«${n}»: IP не в сети этого офиса (LAN или камеры).`,
+    s2sOutIp: (n) => `«${n}»: IP не в сети другого офиса.`,
+    s2sPorts: (n) => `«${n}»: порты — числа через запятую (напр. 8080,8443).`,
+    s2sMac: (n) => `«${n}»: неверный MAC-адрес (напр. AA:BB:CC:DD:EE:FF).`,
+    s2sEmptyList: 'В режиме «выбранные устройства» добавьте хотя бы одно устройство.',
+    nS2s: (name, ip) => `Связь между офисами: ВТОРОЙ скрипт ниже примените на роутере «${name}». Он только добавляет связь и не меняет остальные настройки того роутера. Проверка: /interface wireguard peers print (last-handshake — несколько секунд) и /ping ${ip}.`,
+    nS2sWho: (side, port) => `Связь начинает ${side}; на публичном адресе другой стороны должен быть открыт UDP ${port} (провайдер не должен его блокировать).`,
+    nS2sBoth: 'Указаны публичные адреса обоих роутеров: связь установит та сторона, что начнёт первой.',
+    sideHere: 'этот роутер', sideThere: 'другой роутер',
     ztOverlap: 'Сеть ZeroTier пересекается с LAN, гостевой сетью, сетью камер или WireGuard.',
     nZt: (id, lanCidr) => `ZeroTier, ДО применения: 1) скачайте с mikrotik.com/download архив «Extra packages» для вашей модели, перетащите zerotier-*.npk в Winbox → Files и перезагрузите роутер. 2) /system device-mode print: если zerotier: no, выполните /system device-mode update zerotier=yes и в течение 5 минут нажмите кнопку reset/mode (или выключите и включите питание). Часть скрипта с ZeroTier стоит в самом конце: если пакета нет, не применится только она. ПОСЛЕ применения: my.zerotier.com → сеть ${id} → Members: авторизуйте роутер (Auth)${lanCidr ? `, в Managed Routes добавьте ${lanCidr} via <ZeroTier-IP роутера> (IP: /ip address print where interface=zt-remote)` : ''}. На телефоны и ноутбуки поставьте ZeroTier One, подключитесь к сети ${id} и авторизуйте их в Members. Проверка: /zerotier interface print, /zerotier peer print.`,
   },
@@ -186,6 +240,33 @@ const MSG = {
     ztArch: 'ZeroTier does not run on the selected model: the package exists only for ARM/ARM64 routers. ZeroTier is available for hAP ax, hAP ac2/ac3, RB3011, RB4011 and RB5009.',
     ztNet: 'ZeroTier: the network ID is 16 characters (0-9, a-f), e.g. 1d71939404912b40.',
     ztSub: 'ZeroTier: write the network range as a.b.c.d/nn, e.g. 10.147.17.0/24.',
+    lkName: 'Enter the names of both offices.', lkSameName: 'The office names must differ: the tunnel interfaces are named after them.',
+    lkEndpoint: 'At least one office router needs a public IP or DDNS name.', lkPort: 'The WireGuard port must be 1-65535.',
+    lkLan: (x) => `The LAN network of office ${x} is not valid (e.g. 192.168.20.0/24; several separated by commas).`,
+    lkOverlap: 'The LAN networks of offices A and B overlap. Two offices cannot use the same network: change one (e.g. A 192.168.88.0/24, B 192.168.20.0/24).',
+    lkIp: (n, x) => `"${n}": the IP is not in the LAN network of office ${x}.`,
+    lkApply: (a, b) => `Apply script A on the router of "${a}" and script B on the router of "${b}" (Winbox > New Terminal). They only add the link and leave the rest of the routers as they are.`,
+    lkCheck: (a, b) => `To check: /interface wireguard peers print (last-handshake should be a few seconds); from A /ping ${b}, from B /ping ${a}.`,
+    lkWho: (init, srv, port) => `"${init}" starts the link; UDP ${port} must be open on the public address of "${srv}" (not blocked by the ISP).`,
+    lkSafe: 'On a router in use: turn on Safe Mode in Winbox (Ctrl+X), then paste the script; if the connection drops, the router undoes every change by itself. The script checks first: is this the right router (is its LAN here), is it RouterOS 7, are the port, the interface name, the other office\'s network or the tunnel network already used here. If something conflicts it says why and changes NOTHING. The firewall rules only touch the tunnel, not other traffic. Running it again updates the link; the "undo script" removes it completely.',
+    lkRos7: 'Both routers need RouterOS 7 (WireGuard). Take an /export backup on both routers before applying.',
+    s2sV6: 'The office link uses WireGuard and needs RouterOS 7 on both routers.',
+    s2sName: 'Enter the name of the other office.',
+    s2sEndpoint: 'At least one router needs a public IP or DDNS name: this one or the other one.',
+    s2sEndpointBad: 'The public address is not valid: enter an IP or a domain name (e.g. 85.132.10.20 or office.example.com).',
+    s2sPort: 'The office link port must be 1-65535 and differ from the remote access (VPN) port.',
+    s2sTunnel: 'The tunnel network must be a /30 (e.g. 10.255.255.0/30) and must not overlap this router\'s networks.',
+    s2sRemoteLan: 'The other office network is not valid (e.g. 192.168.20.0/24; several separated by commas).',
+    s2sOverlap: 'The other office network overlaps this router\'s networks. Two offices cannot use the same network: change one of them (e.g. 192.168.88.0/24 and 192.168.20.0/24).',
+    s2sInIp: (n) => `"${n}": the IP is not in this office network (LAN or cameras).`,
+    s2sOutIp: (n) => `"${n}": the IP is not in the other office network.`,
+    s2sPorts: (n) => `"${n}": write the ports as numbers separated by commas (e.g. 8080,8443).`,
+    s2sMac: (n) => `"${n}": the MAC address is not valid (e.g. AA:BB:CC:DD:EE:FF).`,
+    s2sEmptyList: 'In "selected devices" mode add at least one device.',
+    nS2s: (name, ip) => `Office link: apply the SECOND script below on the router of "${name}". It only adds the link and leaves the rest of that router as it is. To check: /interface wireguard peers print (last-handshake should be a few seconds) and /ping ${ip}.`,
+    nS2sWho: (side, port) => `The link is started by ${side}; UDP ${port} must be open on the other side's public address (not blocked by the ISP).`,
+    nS2sBoth: 'Both routers have a public address: whichever side starts first sets up the link.',
+    sideHere: 'this router', sideThere: 'the other router',
     ztOverlap: 'The ZeroTier network overlaps the LAN, guest, camera or WireGuard network.',
     nZt: (id, lanCidr) => `ZeroTier, BEFORE applying: 1) download the "Extra packages" archive for your model from mikrotik.com/download, drop zerotier-*.npk into Winbox → Files and reboot the router. 2) /system device-mode print: if it shows zerotier: no, run /system device-mode update zerotier=yes and press the router's reset/mode button within 5 minutes (or unplug and replug the power). The ZeroTier part is the very last part of the script: without the package only that part fails. AFTER applying: my.zerotier.com → network ${id} → Members: authorize the router (Auth)${lanCidr ? `, and under Managed Routes add ${lanCidr} via <the router's ZeroTier IP> (IP: /ip address print where interface=zt-remote)` : ''}. Install ZeroTier One on phones and laptops, join network ${id} and authorize them in Members too. Check: /zerotier interface print, /zerotier peer print.`,
   },
@@ -212,6 +293,9 @@ export function defaultSpec(device = 'any') {
     vpn: { enabled: false, endpoint: '', port: 13231, address: '10.10.100.1', prefix: 24, access: 'lan', fullTunnel: true, serverPriv: '', serverPub: '', clients: [] },
     // ZeroTier: join a network made in ZeroTier Central (my.zerotier.com); subnet = that network's IPv4 auto-assign range
     zt: { enabled: false, network: '', subnet: '10.147.17.0/24', access: 'lan' },
+    // link to another office (WireGuard site-to-site); keys for both routers are made in the browser
+    s2s: { enabled: false, name: 'Filial', remoteLan: '192.168.20.0/24', localEndpoint: '', remoteEndpoint: '', port: 13232, tunnel: '10.255.255.0/30',
+      remotePppoe: false, inMode: 'all', inList: [], outMode: 'all', outList: [], localPriv: '', localPub: '', remotePriv: '', remotePub: '', psk: '' },
   };
 }
 
@@ -319,6 +403,11 @@ export function validate(spec, lang = 'en') {
       if (others.some((o) => o && overlaps(zs, o))) e.push(M.ztOverlap);
     }
   }
+  if (spec.s2s?.enabled) {
+    const others = [spec.guest.enabled ? subnet(spec.guest.address, spec.guest.prefix) : null, cm.enabled ? subnet(cm.address, cm.prefix) : null,
+      spec.vpn?.enabled ? subnet(spec.vpn.address, spec.vpn.prefix) : null, spec.zt?.enabled ? ztSubnet(spec) : null];
+    s2sValidate(spec, M, e, lan, others);
+  }
   return e;
 }
 
@@ -345,6 +434,8 @@ export function build(spec, lang = 'en') {
   const vs = vpn ? subnet(vpn.address, vpn.prefix) : null;
   const zt = spec.zt?.enabled && !v6 ? spec.zt : null;
   const zs = zt ? ztSubnet(spec) : null;
+  const s2s = spec.s2s?.enabled && !v6 ? s2sInfo(spec) : null;
+  const s2sL = s2s ? s2sLocal(spec, s2s) : null;
   const wifiOn = spec.wifi.enabled && !!dev.wifi && !(v6 && dev.wifi === 'wifi');
   const limitsOn = spec.limits.length > 0;
   const failover = wans.length === 2;
@@ -359,7 +450,8 @@ export function build(spec, lang = 'en') {
     '# Apply on a clean router: /system reset-configuration no-defaults=yes skip-backup=no',
     '# then connect with Winbox via MAC address on a LAN port, open New Terminal and paste.', '');
 
-  add('# --- System ---', `/system identity set name=${q(spec.identity || 'MikroTik')}`);
+  // RouterOS terminals break on non-ASCII text: the router name is transliterated like the comments
+  add('# --- System ---', `/system identity set name=${q(ascii(spec.identity) || 'MikroTik')}`);
   if (spec.timezone) add(`/system clock set time-zone-autodetect=no time-zone-name=${spec.timezone}`);
   if (v6) add('/system ntp client set enabled=yes server-dns-names=pool.ntp.org', '');
   else add('/system ntp client set enabled=yes', '/system ntp client servers add address=pool.ntp.org', '');
@@ -369,6 +461,7 @@ export function build(spec, lang = 'en') {
   if (cams) add('/interface list add name=CAM');
   if (vpn) add('/interface list add name=VPN');
   if (zt) add('/interface list add name=ZT');
+  if (s2s) add('/interface list add name=S2S');
   add('');
 
   add('# --- LAN bridge ---', '/interface bridge add name=bridge-lan protocol-mode=rstp comment="LAN"');
@@ -508,6 +601,8 @@ export function build(spec, lang = 'en') {
     add('');
   }
 
+  if (s2sL) add(...s2sL.lines, '');
+
   const bwPorts = portList.filter(([, v]) => v.down || v.up);
   if (bwPorts.length && dev.bw !== 'no') {
     add('# --- Port speed limits (switch chip, rx = upload from the device, tx = download to it) ---');
@@ -539,6 +634,8 @@ export function build(spec, lang = 'en') {
       add('add chain=input action=accept in-interface-list=VPN protocol=tcp dst-port=53 comment="VPN DNS tcp"');
     }
   }
+  // always open: WireGuard does not answer packets without the right keys, and either side may (re)start the link
+  if (s2s) add(`add chain=input action=accept protocol=udp dst-port=${s2s.port} in-interface-list=WAN comment="office link: WireGuard"`);
   if (zt) add('add chain=input action=accept protocol=udp dst-port=9993 in-interface-list=WAN comment="ZeroTier direct connections"',
     'add chain=input action=accept in-interface-list=ZT comment="accept from ZeroTier"');
   add('add chain=input action=drop comment="drop everything else"');
@@ -562,6 +659,7 @@ export function build(spec, lang = 'en') {
       'add chain=forward action=accept in-interface-list=VPN out-interface-list=WAN comment="VPN to internet"',
     ] : []),
     ...(zt && zt.access === 'lan' ? ['add chain=forward action=accept in-interface-list=ZT out-interface-list=LAN comment="ZeroTier to LAN"'] : []),
+    ...(s2s ? ['add chain=forward action=accept in-interface-list=LAN out-interface-list=S2S comment="office link: LAN to the other office"', ...s2sL.rules.map((r) => `add ${r}`)] : []),
     ...(geoOn ? ['add chain=forward action=jump jump-target=geo connection-state=new connection-nat-state=dstnat in-interface-list=WAN comment="country filter for port forwards"'] : []),
     'add chain=forward action=accept connection-nat-state=dstnat comment="port forwards"',
     'add chain=forward action=drop comment="drop everything else"');
@@ -624,7 +722,324 @@ export function build(spec, lang = 'en') {
     notes.push(M.nZt(String(zt.network).trim().toLowerCase(), zt.access === 'lan' ? lan.cidr : ''));
   }
 
-  return { errors: [], script: o.join('\n') + '\n', notes };
+  let s2sScript = '', s2sUndo = '';
+  if (s2s) {
+    const rs = s2sRemote(spec, s2s);
+    s2sScript = rs.script; s2sUndo = rs.undo;
+    const le = String(spec.s2s.localEndpoint || '').trim(), re = String(spec.s2s.remoteEndpoint || '').trim();
+    notes.push(M.nS2s(ascii(spec.s2s.name), s2s.remoteTun), le && re ? M.nS2sBoth : M.nS2sWho(re ? M.sideHere : M.sideThere, s2s.port), M.lkSafe);
+  }
+  return { errors: [], script: o.join('\n') + '\n', notes, s2sScript, s2sUndo };
+}
+
+// ---- link between two offices (site-to-site): WireGuard, RouterOS 7 on both routers ----
+// Access control lives in the firewall of the router that RECEIVES the traffic from the tunnel:
+// each router decides what the other office may reach in its own network. Allowed devices are kept in
+// address lists per service, so later changes are just list entries (IP > Firewall > Address Lists).
+export const S2S_SVC = {
+  all: null,
+  files: [['tcp', '139,445']],
+  rdp: [['tcp', '3389']],
+  web: [['tcp', '80,443']],
+  print: [['tcp', '515,631,9100']],
+};
+const PORTS_RE = /^\d{1,5}(-\d{1,5})?(,\d{1,5}(-\d{1,5})?)*$/;
+const s2sSlug = (s, fb) => ascii(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 12) || fb;
+const cidrs = (s) => String(s || '').split(/[\s,;]+/).filter(Boolean).map((c) => {
+  const m = c.match(/^([\d.]+)\/(\d{1,2})$/);
+  return m ? subnet(m[1], +m[2]) : null;
+});
+const hostRe = /^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$/;
+const macRe = /^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$/;
+
+/** Everything both scripts need, derived from spec.s2s (null parts when the input is invalid). */
+export function s2sInfo(spec) {
+  const s = spec.s2s || {};
+  const m = String(s.tunnel || '').trim().match(/^([\d.]+)\/30$/);
+  const tun = m ? subnet(m[1], 30) : null;
+  const lan = subnet(spec.lan.address, spec.lan.prefix);
+  const pppoe = [spec.wan1, ...(spec.wan2?.enabled ? [spec.wan2] : [])].some((w) => w.type === 'pppoe') || !!s.remotePppoe;
+  return {
+    tun,
+    localTun: tun ? int2ip(tun.first) : null,
+    remoteTun: tun ? int2ip(tun.last) : null,
+    remoteLans: cidrs(s.remoteLan),
+    localLans: lan ? [lan] : [],
+    ifRemote: `wg-${s2sSlug(s.name, 'office')}`,               // on this router: the tunnel to the other office
+    ifLocal: `wg-${s2sSlug(spec.identity, 'office')}`,         // on the other router: the tunnel back to us
+    listRemote: s2sSlug(s.name, 'office'),
+    listLocal: s2sSlug(spec.identity, 'office'),
+    mtu: pppoe ? 1412 : 1420,
+    port: Number(s.port),
+  };
+}
+
+function s2sValidate(spec, M, e, lan, others) {
+  const s = spec.s2s;
+  if (spec.ros === '6') e.push(M.s2sV6);
+  if (!ascii(s.name)) e.push(M.s2sName);
+  const le = String(s.localEndpoint || '').trim(), re = String(s.remoteEndpoint || '').trim();
+  if (!le && !re) e.push(M.s2sEndpoint);
+  if ((le && !hostRe.test(le)) || (re && !hostRe.test(re))) e.push(M.s2sEndpointBad);
+  const port = Number(s.port);
+  if (!Number.isInteger(port) || port < 1 || port > 65535 || (spec.vpn?.enabled && Number(spec.vpn.port) === port)) e.push(M.s2sPort);
+  const info = s2sInfo(spec);
+  if (!info.tun) e.push(M.s2sTunnel);
+  if (!info.remoteLans.length || info.remoteLans.some((x) => !x)) e.push(M.s2sRemoteLan);
+  else {
+    const mine = [lan, ...others, info.tun].filter(Boolean);
+    if (info.remoteLans.some((r) => mine.some((o) => overlaps(r, o)))) e.push(M.s2sOverlap);
+  }
+  if (info.tun && [lan, ...others].filter(Boolean).some((o) => overlaps(info.tun, o))) e.push(M.s2sTunnel);
+  const cams = spec.cams?.enabled ? subnet(spec.cams.address, spec.cams.prefix) : null;
+  const rows = (list, where, isLocal) => {
+    for (const r of list || []) {
+      const ip = ip2int(r.ip);
+      const nets = isLocal ? [lan, cams].filter(Boolean) : info.remoteLans.filter(Boolean);
+      if (ip === null || !nets.some((n) => inNet(n, ip))) e.push(where(r.name || r.ip || '?'));
+      if (r.svc === 'custom' && !PORTS_RE.test(String(r.ports || '').replace(/\s+/g, ''))) e.push(M.s2sPorts(r.name || r.ip || '?'));
+      if (isLocal && r.mac && !macRe.test(String(r.mac).trim())) e.push(M.s2sMac(r.name || r.ip || '?'));
+    }
+  };
+  if (s.inMode === 'list') { if (!(s.inList || []).length) e.push(M.s2sEmptyList); rows(s.inList, M.s2sInIp, true); }
+  if (s.outMode === 'list') { if (!(s.outList || []).length) e.push(M.s2sEmptyList); rows(s.outList, M.s2sOutIp, false); }
+  if (![s.localPriv, s.localPub, s.remotePriv, s.remotePub, s.psk].every(isWgKey)) e.push(M.wgKeys);
+}
+
+// address-list entries + accept rules for "what the other office may reach here", seen from the receiving router.
+// cm(text) makes the comment (every object of a link carries the link's tag, so it can be found and removed)
+function s2sAccess(list, mode, listPrefix, match, allDst, cm) {
+  const lists = [], rules = [];
+  if (mode !== 'list') {
+    // allDst: one matcher per destination network (dst-address takes a single prefix)
+    for (const d of allDst) rules.push(`chain=forward action=accept ${match} ${d} comment=${cm('whole network')}`);
+    return { lists, rules };
+  }
+  const used = new Set();
+  for (const r of list || []) {
+    const who = ascii(r.name) || r.ip;
+    if (r.svc === 'custom') {
+      const ports = String(r.ports || '').replace(/\s+/g, '');
+      for (const pr of ['tcp', 'udp']) rules.push(`chain=forward action=accept ${match} dst-address=${r.ip} protocol=${pr} dst-port=${ports} comment=${cm(`${who} ${pr} ${ports}`)}`);
+      continue;
+    }
+    const svc = S2S_SVC[r.svc] === undefined ? 'all' : r.svc;
+    lists.push(`/ip firewall address-list add list=s2s-${listPrefix}-${svc} address=${r.ip} comment=${cm(who)}`);
+    used.add(svc);
+  }
+  for (const svc of Object.keys(S2S_SVC)) {
+    if (!used.has(svc)) continue;
+    const dst = `dst-address-list=s2s-${listPrefix}-${svc}`;
+    if (!S2S_SVC[svc]) rules.push(`chain=forward action=accept ${match} ${dst} comment=${cm(`s2s-${listPrefix}-${svc}`)}`);
+    else for (const [pr, ports] of S2S_SVC[svc]) rules.push(`chain=forward action=accept ${match} ${dst} protocol=${pr} dst-port=${ports} comment=${cm(`s2s-${listPrefix}-${svc}`)}`);
+  }
+  return { lists, rules };
+}
+
+const peerLine = (iface, pub, psk, allowed, endpoint, port, comment) =>
+  `/interface wireguard peers add interface=${iface} public-key=${q(pub)} preshared-key=${q(psk)} allowed-address=${allowed}`
+  + (endpoint ? ` endpoint-address=${endpoint} endpoint-port=${port} persistent-keepalive=25s` : ' responder=yes')
+  + ` comment=${comment}`;
+
+/** Lines for THIS router's script inside the Master (a freshly configured router). */
+function s2sLocal(spec, info) {
+  const s = spec.s2s, name = ascii(s.name);
+  const cm = (d) => q(`office link ${name}: ${d}`);
+  const out = ['# --- Link to another office (WireGuard site-to-site) ---',
+    `/interface wireguard add name=${info.ifRemote} listen-port=${info.port} mtu=${info.mtu} private-key=${q(s.localPriv)} comment=${cm('WireGuard')}`,
+    peerLine(info.ifRemote, s.remotePub, s.psk, [`${info.remoteTun}/32`, ...info.remoteLans.map((r) => r.cidr)].join(','), String(s.remoteEndpoint || '').trim(), info.port, cm('peer')),
+    `/ip address add address=${info.localTun}/30 interface=${info.ifRemote} comment=${cm('tunnel address')}`,
+    ...info.remoteLans.map((r) => `/ip route add dst-address=${r.cidr} gateway=${info.ifRemote} comment=${cm(`route to ${r.cidr}`)}`),
+    `/interface list member add interface=${info.ifRemote} list=S2S`];
+  const acc = s2sAccess(s.inList, s.inMode, info.listRemote, 'in-interface-list=S2S', ['out-interface-list=LAN'], cm);
+  out.push(...acc.lists);
+  // fixed addresses for the allowed devices, so a new DHCP lease cannot break the rules
+  const lan = info.localLans[0];
+  if (spec.lan.dhcp && s.inMode === 'list') {
+    for (const r of s.inList || []) {
+      if (r.mac && lan && inNet(lan, ip2int(r.ip))) out.push(`/ip dhcp-server lease add server=dhcp-lan address=${r.ip} mac-address=${String(r.mac).trim().toUpperCase().replace(/-/g, ':')} comment=${cm(ascii(r.name) || r.ip)}`);
+    }
+  }
+  return { lines: out, rules: acc.rules };
+}
+
+/**
+ * Script for ONE router that is already in use (A or B): only the link; nothing else on that router changes.
+ * Safe for production routers:
+ *  - everything runs inside one { } block: the checks stop it with :error BEFORE any change
+ *    (wrong router, RouterOS 6, name/port taken, the other office's network already routed or present here);
+ *  - every object carries the comment tag "ME-link <office>:", so running it again first removes the old link
+ *    (safe update) and the separate undo script removes it completely;
+ *  - firewall/NAT/mangle rules go above the first non-dynamic rule and match only the tunnel interface or the
+ *    other office's networks, so other traffic is not affected;
+ *  - the router itself (Winbox, SSH, DNS ...) is not reachable from the other office;
+ *  - existing DHCP leases are never changed; MSS is clamped; routing marks (PCC, policy routing) skip the link.
+ *  me / peer: { name, lans: [subnet], endpoint }   mode/list: what the PEER office may reach in MY network
+ */
+export function s2sSideScript({ me, peer, priv, peerPub, psk, port, mtu, myTun, peerTun, mode, list }) {
+  const meName = ascii(me.name) || 'A', peerName = ascii(peer.name) || 'B';
+  const slug = s2sSlug(peer.name, 'office'), iface = `wg-${slug}`, tag = `ME-link ${slug}`;
+  const cm = (d) => q(`${tag}: ${d}`);
+  const myC = me.lans.map((r) => r.cidr), peerC = peer.lans.map((r) => r.cidr);
+  const tunSn = subnet(myTun, 30);
+  const host = (r) => int2ip(r.first);
+  const notOurs = `!(comment~"^${tag}:")`;
+  const stop = (why) => `:error ${q(`MikrotikEasy: ${why} Nothing was changed.`)}`;
+  const cleanup = [
+    `/ip firewall filter remove [find where comment~"^${tag}:"]`,
+    `/ip firewall nat remove [find where comment~"^${tag}:"]`,
+    `/ip firewall mangle remove [find where comment~"^${tag}:"]`,
+    `/ip firewall address-list remove [find where comment~"^${tag}:"]`,
+    `/ip dhcp-server lease remove [find where comment~"^${tag}:"]`,
+    `/ip route remove [find where comment~"^${tag}:"]`,
+    `/ip address remove [find where comment~"^${tag}:"]`,
+    `/interface wireguard peers remove [find where comment~"^${tag}:"]`,
+    `/interface wireguard remove [find where comment~"^${tag}:"]`,
+  ];
+
+  const checks = [
+    `:if ([:pick [/system resource get version] 0 1] != "7") do={ ${stop('this script needs RouterOS 7 (WireGuard).')} }`,
+    // the right script on the right router: this router must have its own LAN
+    ...me.lans.map((r) => `:if ([:len [/ip address find where (${host(r)} in address)]] = 0) do={ ${stop(`LAN ${r.cidr} of "${meName}" is not on this router - is this the right script for this router?`)} }`),
+    `:if ([:len [/interface find where name="${iface}" and ${notOurs}]] > 0) do={ ${stop(`an interface named ${iface} already exists and is not from this link.`)} }`,
+    `:if ([:len [/interface wireguard find where listen-port=${port} and ${notOurs}]] > 0) do={ ${stop(`UDP ${port} is already used by another WireGuard interface - choose another port.`)} }`,
+    // the other office's networks and the tunnel must be new to this router (no overlap, no other route to them)
+    ...[...peer.lans, tunSn].flatMap((r) => [
+      `:if ([:len [/ip address find where (${host(r)} in address) and ${notOurs}]] > 0) do={ ${stop(`${r.cidr} overlaps an address on this router.`)} }`,
+      `:if ([:len [/ip route find where dst-address in ${r.cidr} and ${notOurs} and !(gateway~"^${iface}")]] > 0) do={ ${stop(`this router already has a route inside ${r.cidr}.`)} }`,
+      `:if ([:len [/ip route find where dst-address!=0.0.0.0/0 and (${host(r)} in dst-address) and ${notOurs} and !(gateway~"^${iface}")]] > 0) do={ ${stop(`${r.cidr} is already reachable through another route on this router.`)} }`,
+    ]),
+  ];
+
+  const make = [
+    `/interface wireguard add name=${iface} listen-port=${port} mtu=${mtu} private-key=${q(priv)} comment=${cm(`WireGuard to ${peerName}`)}`,
+    peerLine(iface, peerPub, psk, [`${peerTun}/32`, ...peerC].join(','), String(peer.endpoint || '').trim(), port, cm(peerName)),
+    `/ip address add address=${myTun}/30 interface=${iface} comment=${cm('tunnel address')}`,
+    ...peerC.map((c) => `/ip route add dst-address=${c} gateway=${iface} comment=${cm(`route to ${c}`)}`),
+  ];
+  const acc = s2sAccess(list, mode, slug, `in-interface=${iface}`, myC.map((c) => `dst-address=${c}`), cm);
+  make.push(...acc.lists);
+  // fixed address only for a device that has no lease yet and whose IP is free; existing leases stay untouched
+  if (mode === 'list') {
+    for (const r of list || []) {
+      if (!r.mac || !me.lans.some((n) => inNet(n, ip2int(r.ip)))) continue;
+      const mac = String(r.mac).trim().toUpperCase().replace(/-/g, ':');
+      make.push(`:if (([:len [/ip dhcp-server lease find where mac-address="${mac}"]] = 0) and ([:len [/ip dhcp-server lease find where address=${r.ip}]] = 0)) do={ /ip dhcp-server lease add address=${r.ip} mac-address=${mac} comment=${cm(ascii(r.name) || r.ip)} } else={ :log warning ${q(`MikrotikEasy: ${mac} or ${r.ip} already has a DHCP lease; it was not changed`)} }`);
+    }
+  }
+  // wanted order, top to bottom; inserted bottom-up above the first non-dynamic rule
+  // (v7 keeps a dynamic FastTrack counter rule at the top; nothing can be placed before it)
+  const filter = [
+    `chain=input action=accept protocol=udp dst-port=${port} comment=${cm('WireGuard port')}`,
+    `chain=input action=accept in-interface=${iface} protocol=icmp comment=${cm('ping over the link')}`,
+    `chain=input action=drop in-interface=${iface} comment=${cm(`the router itself is not reachable from ${peerName}`)}`,
+    `chain=forward action=accept in-interface=${iface} connection-state=established,related comment=${cm('replies')}`,
+    ...acc.rules,
+    `chain=forward action=drop in-interface=${iface} comment=${cm(`everything else from ${peerName}`)}`,
+    ...myC.map((c) => `chain=forward action=accept out-interface=${iface} src-address=${c} comment=${cm(`to ${peerName}`)}`),
+  ];
+  const mangle = [
+    ...peerC.map((c) => `chain=prerouting action=accept dst-address=${c} comment=${cm('no routing marks for the link')}`),
+    `chain=forward action=change-mss new-mss=clamp-to-pmtu protocol=tcp tcp-flags=syn out-interface=${iface} passthrough=yes comment=${cm('MSS')}`,
+    `chain=forward action=change-mss new-mss=clamp-to-pmtu protocol=tcp tcp-flags=syn in-interface=${iface} passthrough=yes comment=${cm('MSS')}`,
+  ];
+  const nat = peerC.map((c) => `chain=srcnat action=accept dst-address=${c} comment=${cm(`no NAT to ${peerName}`)}`);
+  const ins = (menu, r) => `:set f ([${menu} find where dynamic=no]->0); :if ([:typeof $f] = "id") do={ ${menu} add ${r} place-before=$f } else={ ${menu} add ${r} }`;
+  const top = (menu, rules) => [...rules].reverse().map((r) => ins(menu, r));
+
+  const head = [
+    `# MikrotikEasy: office link "${meName}" <-> "${peerName}" - apply on the router of "${meName}" (RouterOS 7)`,
+    `# LAN here: ${myC.join(', ')}   LAN of ${peerName}: ${peerC.join(', ')}   tunnel: ${myTun} <-> ${peerTun}`,
+    '# Adds only the link; the rest of this router\'s configuration is not changed.',
+    '# Before pasting: Winbox > Safe Mode (Ctrl+X). If the router becomes unreachable, everything is undone.',
+    '# The checks below stop the script before any change if something on this router conflicts.',
+    '# Running it again replaces the link; the separate undo script removes it.', '',
+  ];
+  const script = [...head, '{', ':local f', ...checks, ...cleanup, ...make, ...top('/ip firewall filter', filter),
+    ...top('/ip firewall nat', nat), ...top('/ip firewall mangle', mangle),
+    `:put ${q(`MikrotikEasy: office link to ${peerName} is in place`)}`, '}'].join('\n') + '\n';
+  const undo = [`# MikrotikEasy: remove the office link "${meName}" <-> "${peerName}" from the router of "${meName}"`,
+    '# Removes only the objects tagged with this link.', '', '{', ...cleanup, `:put ${q(`MikrotikEasy: office link to ${peerName} removed`)}`, '}'].join('\n') + '\n';
+  return { script, undo };
+}
+
+/** Separate script for the OTHER router (B) of the Master's office link. */
+function s2sRemote(spec, info) {
+  const s = spec.s2s;
+  return s2sSideScript({
+    me: { name: s.name, lans: info.remoteLans, endpoint: s.remoteEndpoint },
+    peer: { name: ascii(spec.identity) || 'MikroTik', lans: info.localLans, endpoint: s.localEndpoint },
+    priv: s.remotePriv, peerPub: s.localPub, psk: s.psk, port: info.port, mtu: info.mtu,
+    myTun: info.remoteTun, peerTun: info.localTun, mode: s.outMode, list: s.outList,
+  });
+}
+
+// ---------------- stand-alone office link tool (both routers already configured) ----------------
+export function defaultLink() {
+  return {
+    a: { name: 'A', lan: '192.168.88.0/24', endpoint: '', pppoe: false },
+    b: { name: 'B', lan: '192.168.20.0/24', endpoint: '', pppoe: false },
+    port: 13232, tunnel: '10.255.255.0/30',
+    aMode: 'all', aList: [], bMode: 'all', bList: [],
+    aPriv: '', aPub: '', bPriv: '', bPub: '', psk: '',
+  };
+}
+
+export function linkInfo(L) {
+  const m = String(L.tunnel || '').trim().match(/^([\d.]+)\/30$/);
+  const tun = m ? subnet(m[1], 30) : null;
+  return {
+    tun, aTun: tun ? int2ip(tun.first) : null, bTun: tun ? int2ip(tun.last) : null,
+    aLans: cidrs(L.a?.lan), bLans: cidrs(L.b?.lan),
+    mtu: L.a?.pppoe || L.b?.pppoe ? 1412 : 1420, port: Number(L.port),
+  };
+}
+
+export function validateLink(L, lang = 'en') {
+  const M = MSG[lang] || MSG.en, e = [], info = linkInfo(L);
+  if (!ascii(L.a?.name) || !ascii(L.b?.name)) e.push(M.lkName);
+  else if (s2sSlug(L.a.name, 'a') === s2sSlug(L.b.name, 'b')) e.push(M.lkSameName);
+  const ea = String(L.a?.endpoint || '').trim(), eb = String(L.b?.endpoint || '').trim();
+  if (!ea && !eb) e.push(M.lkEndpoint);
+  if ((ea && !hostRe.test(ea)) || (eb && !hostRe.test(eb))) e.push(M.s2sEndpointBad);
+  if (!Number.isInteger(info.port) || info.port < 1 || info.port > 65535) e.push(M.lkPort);
+  if (!info.tun) e.push(M.s2sTunnel);
+  const bad = (l) => !l.length || l.some((x) => !x);
+  if (bad(info.aLans)) e.push(M.lkLan('A'));
+  if (bad(info.bLans)) e.push(M.lkLan('B'));
+  if (!bad(info.aLans) && !bad(info.bLans)) {
+    if (info.aLans.some((a) => info.bLans.some((b) => overlaps(a, b)))) e.push(M.lkOverlap);
+    if (info.tun && [...info.aLans, ...info.bLans].some((n) => overlaps(n, info.tun))) e.push(M.s2sTunnel);
+  }
+  const rows = (list, nets, side) => {
+    for (const r of list || []) {
+      const ip = ip2int(r.ip), n = r.name || r.ip || '?';
+      if (ip === null || !nets.filter(Boolean).some((x) => inNet(x, ip))) e.push(M.lkIp(n, side));
+      if (r.svc === 'custom' && !PORTS_RE.test(String(r.ports || '').replace(/\s+/g, ''))) e.push(M.s2sPorts(n));
+      if (r.mac && !macRe.test(String(r.mac).trim())) e.push(M.s2sMac(n));
+    }
+  };
+  if (L.aMode === 'list') { if (!(L.aList || []).length) e.push(M.s2sEmptyList); rows(L.aList, info.aLans, 'A'); }
+  if (L.bMode === 'list') { if (!(L.bList || []).length) e.push(M.s2sEmptyList); rows(L.bList, info.bLans, 'B'); }
+  if (![L.aPriv, L.aPub, L.bPriv, L.bPub, L.psk].every(isWgKey)) e.push(M.wgKeys);
+  return e;
+}
+
+/** Two add-on scripts, one per router. */
+export function buildLink(L, lang = 'en') {
+  const M = MSG[lang] || MSG.en;
+  const errors = validateLink(L, lang);
+  if (errors.length) return { errors, a: '', b: '', notes: [] };
+  const i = linkInfo(L);
+  const A = { name: L.a.name, lans: i.aLans, endpoint: L.a.endpoint }, B = { name: L.b.name, lans: i.bLans, endpoint: L.b.endpoint };
+  const common = { psk: L.psk, port: i.port, mtu: i.mtu };
+  const ra = s2sSideScript({ ...common, me: A, peer: B, priv: L.aPriv, peerPub: L.bPub, myTun: i.aTun, peerTun: i.bTun, mode: L.aMode, list: L.aList });
+  const rb = s2sSideScript({ ...common, me: B, peer: A, priv: L.bPriv, peerPub: L.aPub, myTun: i.bTun, peerTun: i.aTun, mode: L.bMode, list: L.bList });
+  const a = ra.script, b = rb.script, aUndo = ra.undo, bUndo = rb.undo;
+  const ea = String(L.a.endpoint || '').trim(), eb = String(L.b.endpoint || '').trim();
+  const notes = [M.lkApply(ascii(L.a.name), ascii(L.b.name)), M.lkCheck(i.aTun, i.bTun),
+    ea && eb ? M.nS2sBoth : M.lkWho(ea ? ascii(L.b.name) : ascii(L.a.name), ea ? ascii(L.a.name) : ascii(L.b.name), i.port), M.lkRos7, M.lkSafe];
+  return { errors: [], a, b, aUndo, bUndo, notes };
 }
 
 // ZeroTier subnet "a.b.c.d/nn" -> subnet() object or null

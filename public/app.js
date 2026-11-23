@@ -2,6 +2,7 @@ import { STR } from './i18n.js';
 import { WZ } from './wizard-i18n.js';
 import { createWizard } from './wizard.js';
 import { createSettingsDialog } from './settings.js';
+import { createLinkTool } from './link.js';
 
 const $ = (id) => document.getElementById(id);
 const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
@@ -36,15 +37,19 @@ function render() {
   sel.innerHTML = Object.entries(devices).map(([k, v]) => `<option value="${k}">${esc(k === 'any' ? '—' : v)}</option>`).join('');
   sel.value = cur;
   if (last) showResult(last);
-  $('vWiz').textContent = WZ[lang].tabWizard; $('vAi').textContent = WZ[lang].tabAi;
+  $('vWiz').textContent = WZ[lang].tabWizard; $('vAi').textContent = WZ[lang].tabAi; $('vLink').textContent = linkTool.tab();
   document.querySelectorAll('.view').forEach((b) => b.classList.toggle('active', b.dataset.view === view));
   $('wizView').classList.toggle('hidden', view !== 'wiz'); $('aiView').classList.toggle('hidden', view !== 'ai');
-  wizard?.render();
+  $('linkView').classList.toggle('hidden', view !== 'link');
+  if (view === 'wiz') wizard?.render();
+  if (view === 'link') linkTool.render();
 }
 const AI = document.documentElement.dataset.ai !== '0';
 const settingsDlg = createSettingsDialog({ lang: () => lang, toast });
 $('gear').addEventListener('click', () => settingsDlg.open());
-let view = AI ? store.get('view') || 'wiz' : 'wiz';
+let view = store.get('view') || 'wiz';
+if (!AI && view === 'ai') view = 'wiz';
+const linkTool = createLinkTool($('linkView'), { lang: () => lang, toast });
 $('ros').value = store.get('aiRos') === '6' ? '6' : '7';
 $('ros').addEventListener('change', () => store.set('aiRos', $('ros').value));
 let wizard = null;
@@ -82,7 +87,7 @@ async function runIt() {
 
 document.addEventListener('click', async (e) => {
   const b = e.target.closest('button'); if (!b) return;
-  if (b.closest('#wizView')) return; // wizard handles its own clicks
+  if (b.closest('#wizView') || b.closest('#linkView')) return; // the wizard and the link tool handle their own clicks
   if (b.dataset.view) { view = b.dataset.view; store.set('view', view); render(); return; }
   if (b.dataset.lang) { lang = b.dataset.lang; store.set('lang', lang); render(); }
   else if (b.dataset.mode && b.dataset.mode !== mode) { drafts[mode] = $('input').value; mode = b.dataset.mode; $('input').value = drafts[mode]; render(); }

@@ -18,9 +18,9 @@ they update as you fill in the form, the active step lights up, and a click on a
 - Red dots show unwanted connections from outside.
 - Orange dots show access from outside that you allowed.
 
-### Master (setup wizard)
+### Configurator (setup wizard)
 
-The Master builds the script from fixed templates, with no LLM involved, so the same answers always give the
+The Configurator builds the script from fixed templates, with no LLM involved, so the same answers always give the
 same script. The answers are checked as you go, and the result is validated against a RouterOS command
 schema and server-side lint rules.
 
@@ -82,6 +82,50 @@ schema and server-side lint rules.
   works without a public IP, behind CGNAT or LTE. ZeroTier devices reach the router only or the home
   network too. The option is offered only on models that run the zerotier package (hAP ax, hAP ac2/ac3,
   RB3011, RB4011, RB5009), and the notes list the package, device-mode and ZeroTier Central steps.
+
+### VPN tunnel between two offices (beta)
+
+> [!WARNING]
+> **Beta, not fully tested.** The generated scripts pass the RouterOS syntax check (`:parse` on RouterOS
+> 7.25.1) and the schema and lint checks, but the link has not yet been tested end to end between two real
+> routers. Try it on lab routers before production, take an `/export` backup, and use Winbox Safe Mode.
+
+<p align="center"><img src="docs/diagram-offices.svg" alt="Office A and office B linked by an encrypted WireGuard tunnel" width="820"></p>
+
+Two MikroTik routers (office A and office B, both RouterOS 7) are linked by an encrypted WireGuard tunnel.
+
+- **Two networks to tell apart:**
+  - The **LAN network** is where the office's computers and servers are, for example
+    `192.168.20.0/24`. The LAN networks of the two offices must differ.
+  - The **tunnel network** is a small /30 used only between the two routers (`10.255.255.0/30`: A gets
+    `.1`, B gets `.2`).
+- **Permissions per direction:** each office decides what the other may reach, either the whole LAN or
+  selected devices. For selected devices you choose a service: file sharing, remote desktop, web, printer
+  or your own ports.
+  - Allowed devices are kept in address lists, so you change permissions later in
+    *IP > Firewall > Address Lists* without editing rules.
+  - An optional MAC address gives a device a fixed IP.
+- **Public address:** one public IP or DDNS name is enough. The side without one starts the link, which
+  also works behind NAT or LTE.
+- **Where to set it up:**
+  - In the **Configurator**, in the remote-access part of the last form step, this router is A and you
+    also get a script for B.
+  - The **VPN tunnel** tab is for two routers that are already configured. It gives an add-on script for
+    A and for B, plus an undo script for each.
+- **Built for routers in use:**
+  - The script runs as one block. It first checks the following and, if something conflicts, it stops and
+    says why, without changing anything:
+    - it is the right router (its own LAN is there)
+    - the router runs RouterOS 7
+    - the port and interface name are free
+    - the other office's network and the tunnel network are not already routed or addressed on this
+      router
+  - The firewall, NAT and mangle rules go above the existing rules and below the dynamic FastTrack rule.
+    They match only the tunnel, so other traffic is not affected.
+  - The router itself is not reachable from the other office.
+  - Existing DHCP leases are never changed, MSS is clamped, and routing marks (PCC, policy routing) skip
+    the link.
+  - Every object is tagged, so running the script again updates the link and the undo script removes it.
 
 ### AI assistant (optional)
 
@@ -157,7 +201,7 @@ services:
       - "3090:3090"
     environment:
       - TZ=Asia/Baku
-      # Optional AI assistant. The Master works without it, and you can also set it later
+      # Optional AI assistant. The Configurator works without it, and you can also set it later
       # in Settings (gear icon).
       # - AI_ENABLED=true
       # - LLM_BASE_URL=http://ollama.lan:11434/v1
@@ -214,7 +258,7 @@ Health check: `GET /healthz`. Version: `GET /api/info`.
 
 ## How the checks work
 
-- `public/wizard-core.js` builds the Master script. The same module runs in the browser and on the server.
+- `public/wizard-core.js` builds the Configurator script. The same module runs in the browser and on the server.
 - `prompts.mjs` holds the rules for the LLM and a server-side lint that runs independently of the model.
   The lint looks for logic errors such as a firewall without a drop rule, dst-nat that hijacks LAN traffic,
   closed WireGuard or DHCPv6 ports, a WAN port inside a bridge, or empty interface lists.

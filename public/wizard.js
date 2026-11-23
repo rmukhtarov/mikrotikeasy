@@ -1,5 +1,5 @@
 import { WZ } from './wizard-i18n.js';
-import { DEVICE_PORTS, defaultSpec, build, defaultPool, int2ip, geoList, isWgKey, wgClientIps, wgClientConf } from './wizard-core.js';
+import { DEVICE_PORTS, defaultSpec, build, defaultPool, int2ip, geoList, isWgKey, wgClientIps, wgClientConf, ascii, subnet } from './wizard-core.js';
 import { wgKeypair, wgPsk } from './wg-keys.js';
 import { renderDiagram } from './diagram.js';
 
@@ -58,6 +58,62 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
     finally { wgBusy = false; }
     render();
   }
+  // ---- link between offices (WireGuard site-to-site): keys for BOTH routers are made here ----
+  let s2sBusy = false, s2sFailed = false;
+  async function s2sEnsureKeys(all = false, auto = false) {
+    const s = spec.s2s; if (!s?.enabled || s2sBusy || (auto && s2sFailed)) return;
+    if (!all && [s.localPriv, s.localPub, s.remotePriv, s.remotePub, s.psk].every(isWgKey)) return;
+    s2sBusy = true;
+    try {
+      if (all || !isWgKey(s.localPriv) || !isWgKey(s.localPub)) { const k = await wgKeypair(); s.localPriv = k.priv; s.localPub = k.pub; }
+      if (all || !isWgKey(s.remotePriv) || !isWgKey(s.remotePub)) { const k = await wgKeypair(); s.remotePriv = k.priv; s.remotePub = k.pub; }
+      if (all || !isWgKey(s.psk)) s.psk = wgPsk();
+      check = null; save(); s2sFailed = false;
+    } catch { s2sFailed = true; toast(T().vpnKeyErr); }
+    finally { s2sBusy = false; }
+    render();
+  }
+  const s2sTitleName = () => spec.s2s?.name || T().s2sDefaultName;
+  function s2sAccessHtml(dir) {
+    const t = T(), s = spec.s2s, modeKey = `${dir}Mode`, listKey = `${dir}List`;
+    s[listKey] ||= [];
+    const svcOpts = [['all', t.s2sSvcAll], ['files', t.s2sSvcFiles], ['rdp', t.s2sSvcRdp], ['web', t.s2sSvcWeb], ['print', t.s2sSvcPrint], ['custom', t.s2sSvcCustom]];
+    let h = `<h4>${esc(dir === 'in' ? t.s2sInTitle(s2sTitleName()) : t.s2sOutTitle(s2sTitleName()))}</h4>`;
+    h += field(t.s2sAll + ' / ' + t.s2sList, select(`s2s.${modeKey}`, [['all', t.s2sAll], ['list', t.s2sList]]), dir === 'in' ? t.s2sInHint : t.s2sOutHint);
+    if (s[modeKey] !== 'list') return h;
+    h += s[listKey].map((r, i) => {
+      const p = `s2s.${listKey}.${i}`;
+      const extra = [r.svc === 'custom' ? field(t.s2sPortsF, input(`${p}.ports`, 'placeholder="8080,8443" inputmode="numeric"')) : '',
+        dir === 'in' ? field(t.s2sMacF, input(`${p}.mac`, 'placeholder="AA:BB:CC:DD:EE:FF" spellcheck="false"'), t.s2sMacHint) : ''].filter(Boolean);
+      return `<div class="rowcard"><div class="grid3">${field(t.s2sDev, input(`${p}.name`, 'maxlength="40"'))}${field('IP', input(`${p}.ip`, `placeholder="${dir === 'in' ? '192.168.88.20' : '192.168.20.20'}" spellcheck="false"`))}${field(t.s2sSvc, select(`${p}.svc`, svcOpts))}</div>`
+        + (extra.length ? `<div class="grid2">${extra.join('')}</div>` : '')
+        + `<button class="link" data-s2sdel="${listKey}.${i}">${esc(t.remove)}</button></div>`;
+    }).join('');
+    return h + `<button class="chip" data-s2sadd="${listKey}">${esc(t.s2sAddDev)}</button>`;
+  }
+  function s2sHtml() {
+    const t = T(), s = spec.s2s;
+    let h = `<h4>${esc(t.s2sTitle)}</h4><p class="muted">${esc(t.s2sIntro)}</p>`;
+    if (spec.ros === '6') return h + `<p class="box warnbox">${esc(t.s2sV6)}</p>`;
+    h += check_('s2s.enabled', t.s2sOn);
+    if (!s.enabled) return h;
+    h += `<p class="muted">${esc(t.s2sToolHint)}</p>`;
+    h += `<p class="box accent">${esc(t.s2sALan(subnet(spec.lan.address, spec.lan.prefix)?.cidr || '?'))}</p>`;
+    h += `<div class="grid2">${field(t.s2sName, input('s2s.name', 'maxlength="40"'))}${field(t.s2sRemoteLan, input('s2s.remoteLan', 'placeholder="192.168.20.0/24" spellcheck="false"'), t.s2sRemoteLanHint)}</div>`;
+    h += `<div class="grid2">${field(t.s2sLocalEp, input('s2s.localEndpoint', 'placeholder="ofis.example.com" spellcheck="false"'), t.s2sLocalEpHint)}${field(t.s2sRemoteEp, input('s2s.remoteEndpoint', 'placeholder="filial.example.com" spellcheck="false"'), t.s2sRemoteEpHint)}</div>`;
+    h += `<details class="s2sadv"><summary>${esc(t.s2sAdvanced)}</summary><div class="grid2">${field(t.s2sPort, input('s2s.port', 'inputmode="numeric"'))}${field(t.s2sTunnel, input('s2s.tunnel', 'spellcheck="false"'), t.s2sTunnelHint)}</div>${check_('s2s.remotePppoe', t.s2sPppoe)}</details>`;
+    h += s2sAccessHtml('in') + s2sAccessHtml('out');
+    return h + `<div class="btns"><button class="chip" data-s2skeys>${esc(t.vpnRekey)}</button></div><p class="muted">${esc(t.s2sKeysNote)}</p>`;
+  }
+  function s2sResultHtml() {
+    const t = T();
+    if (!result?.s2sScript) return '';
+    return `<h3>${esc(t.s2sResTitle(s2sTitleName()))}</h3><p class="box warnbox">${esc(t.s2sResHint)}</p>
+      <div class="out-head"><b>${esc(s2sTitleName())}</b><div class="btns"><button data-s2scopy>Copy</button><button data-s2sdl>.rsc</button></div></div>
+      <pre>${esc(result.s2sScript)}</pre>
+      ${result.s2sUndo ? `<details class="lk-undo"><summary>${esc(t.s2sUndoT(s2sTitleName()))}</summary><p class="muted">${esc(t.s2sUndoHint)}</p><div class="btns"><button data-s2sucopy>Copy</button></div><pre>${esc(result.s2sUndo)}</pre></details>` : ''}`;
+  }
+  const s2sFile = () => `${String(ascii(s2sTitleName()) || 'office').replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'office'}-office-link-${new Date().toISOString().slice(0, 10)}.rsc`;
   async function wgAddClient() {
     const v = spec.vpn;
     v.clients.push({ name: `${T().vpnDefaultName} ${v.clients.length + 1}`, priv: '', pub: '', psk: '' });
@@ -75,7 +131,7 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
     return [p, `/${p}  ${mask}  (${2 ** (32 - p) - 2} ${T().hosts})`];
   });
   // RouterOS file names: keep them ASCII and space-free so /import file-name=... can be typed as is
-  const fname = () => `${String(spec.identity || 'mikrotik').replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'mikrotik'}-v${spec.ros || '7'}-${new Date().toISOString().slice(0, 10)}.rsc`;
+  const fname = () => `${String(ascii(spec.identity) || 'mikrotik').replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'mikrotik'}-v${spec.ros || '7'}-${new Date().toISOString().slice(0, 10)}.rsc`;
   const wgFile = (name, i) => (String(name || '').normalize('NFD').replace(/[^A-Za-z0-9_=+.-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 15) || `wg-client-${i + 1}`);
   function secHtml() {
     const t = T();
@@ -241,7 +297,7 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
         const lm = spec.limits.map((l, i) => `<div class="rowcard"><div class="grid4">${field(t.fName, input(`limits.${i}.name`))}${field(t.target, input(`limits.${i}.target`, 'placeholder="192.168.88.100-192.168.88.150"'))}${field(t.down, input(`limits.${i}.down`, `placeholder="${esc(t.mbps)}" inputmode="decimal"`))}${field(t.up, input(`limits.${i}.up`, `placeholder="${esc(t.mbps)}" inputmode="decimal"`))}</div><button class="link" data-del="limits.${i}">${esc(t.remove)}</button></div>`).join('');
         return `<h3>${esc(t.fwd)}</h3>${fw}<button class="chip" data-addrow="forwards">${esc(t.fwdAdd)}</button>${spec.forwards.length ? check_('hairpin', t.hairpin) : ''}
           <h3>${esc(t.lim)}</h3>${lm}<button class="chip" data-addrow="limits">${esc(t.limAdd)}</button>
-          <h3>${esc(t.secTitle)}</h3>${secHtml()}<h3>${esc(t.remoteTitle)}</h3><p class="muted">${esc(t.remoteIntro)}</p>${vpnHtml()}${ztHtml()}`;
+          <h3>${esc(t.secTitle)}</h3>${secHtml()}<h3>${esc(t.remoteTitle)}</h3><p class="muted">${esc(t.remoteIntro)}</p>${vpnHtml()}${ztHtml()}${s2sHtml()}`;
       }
       case 6: {
         spec.vpn ||= defaultSpec(spec.device).vpn;
@@ -250,7 +306,7 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
         const ck = check ? (check.issues.length ? `<div class="box warnbox"><b>${esc(t.checkBad)}</b><ul>${check.issues.map((e) => `<li>${esc(e)}</li>`).join('')}</ul></div>` : `<div class="box ok">✓ ${esc(spec.ros === '6' ? t.checkV6 : t.checkOk(check.schema || '7'))}</div>`) : '';
         return `${ck}<div class="box accent"><b>${esc(t.notes)}</b><ul>${r.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul></div>
           <div class="out-head"><h3>RouterOS</h3><div class="btns"><button data-act="copy">Copy</button><button data-act="dl">.rsc</button></div></div>
-          <pre>${esc(r.script)}</pre><h3>${esc(t.howApply)}</h3><ol class="muted apply">${t.apply(fname()).map((a) => `<li>${code(a)}</li>`).join('')}</ol>${wgResultHtml()}`;
+          <pre>${esc(r.script)}</pre><h3>${esc(t.howApply)}</h3><ol class="muted apply">${t.apply(fname()).map((a) => `<li>${code(a)}</li>`).join('')}</ol>${wgResultHtml()}${s2sResultHtml()}`;
       }
     }
     return '';
@@ -278,7 +334,7 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
 
   function render() {
     const t = T();
-    if (step === 5 || step === 6) { spec.vpn ||= defaultSpec(spec.device).vpn; spec.zt ||= defaultSpec(spec.device).zt; }
+    if (step === 5 || step === 6) { spec.vpn ||= defaultSpec(spec.device).vpn; spec.zt ||= defaultSpec(spec.device).zt; spec.s2s ||= defaultSpec(spec.device).s2s; }
     if (step === 6) result = build(spec, getLang());
     root.innerHTML = `<p class="muted">${esc(t.wizIntro)}</p>
       <ol class="stepper">${t.steps.map((s, i) => `<li class="${i === step ? 'cur' : i < step ? 'done' : ''}"><button data-go="${i}"><span>${i + 1}</span>${esc(s)}</button></li>`).join('')}</ol>
@@ -293,6 +349,7 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
         .then((r) => r.json()).then((c) => { check = c; if (step === 6) render(); }).catch(() => {});
     }
     if ((step === 5 || step === 6) && spec.vpn?.enabled && spec.ros !== '6') wgEnsureKeys(false, true);
+    if ((step === 5 || step === 6) && spec.s2s?.enabled && spec.ros !== '6') s2sEnsureKeys(false, true);
   }
 
   function onInput(e) {
@@ -311,6 +368,7 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
       spec.zt ||= defaultSpec(spec.device).zt;
       if (!DEVICE_PORTS[spec.device]?.zt || spec.ros === '6') spec.zt.enabled = false;
       if (spec.ros === '6' && spec.vpn) spec.vpn.enabled = false;
+      if (spec.ros === '6' && spec.s2s) spec.s2s.enabled = false;
     }
     if (p === 'vpn.enabled' && v && !spec.vpn.clients.length) spec.vpn.clients.push({ name: `${T().vpnDefaultName} 1`, priv: '', pub: '', psk: '' });
     check = null; save();
@@ -347,6 +405,16 @@ export function createWizard(root, { lang: getLang, labels, toast }) {
     else if (b.dataset.ccrm) setCountries(geoList(spec.security.geoCountries).filter((c) => c !== b.dataset.ccrm));
     else if (b.hasAttribute('data-ccclear')) setCountries([]);
     else if (b.hasAttribute('data-wgadd')) wgAddClient();
+    else if (b.dataset.s2sadd) { spec.s2s[b.dataset.s2sadd].push({ name: '', ip: '', svc: 'all', ports: '', mac: '' }); check = null; save(); render(); }
+    else if (b.dataset.s2sdel) { const [k, i] = b.dataset.s2sdel.split('.'); spec.s2s[k].splice(+i, 1); check = null; save(); render(); }
+    else if (b.hasAttribute('data-s2skeys')) { if (confirm(T().vpnRekeyConfirm)) s2sEnsureKeys(true); }
+    else if (b.hasAttribute('data-s2sucopy') && result?.s2sUndo) { await navigator.clipboard.writeText(result.s2sUndo); toast('✓'); }
+    else if (b.hasAttribute('data-s2scopy') && result?.s2sScript) { await navigator.clipboard.writeText(result.s2sScript); toast('✓'); }
+    else if (b.hasAttribute('data-s2sdl') && result?.s2sScript) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([result.s2sScript], { type: 'text/plain' }));
+      a.download = s2sFile(); a.click();
+    }
     else if (b.dataset.wgdel !== undefined) { spec.vpn.clients.splice(+b.dataset.wgdel, 1); check = null; save(); render(); }
     else if (b.hasAttribute('data-wgkeys')) { if (confirm(T().vpnRekeyConfirm)) wgEnsureKeys(true); }
     else if (b.dataset.wgcopy !== undefined) { await navigator.clipboard.writeText(wgClientConf(spec, +b.dataset.wgcopy)); toast('✓'); }

@@ -284,11 +284,13 @@ export function normalize(script) {
   const lines = script.replace(/\\\r?\n\s*/g, '').split(/\r?\n/);
   for (let raw of lines) {
     const l = raw.trim();
-    if (!l || l.startsWith('#')) continue;
+    if (!l || l.startsWith('#') || l === '{' || l === '}') continue;
     if (l.startsWith(':')) {
-      // scripting line (:if/:foreach/:do): lint the commands inside do={ ... } as normal commands
-      const body = (l.match(/do=\{([\s\S]*)\}/) || [])[1] || '';
-      for (const c of body.split(/;\s*(?=\/)/)) if (c.trim().startsWith('/')) out.push(...normalize(c.trim().replace(/;\s*$/, '')));
+      // scripting line (:if ... do={ }, :do { } on-error={ }): lint the commands of each do-block as normal
+      // commands; on-error blocks are fallbacks of the same command and are skipped to avoid duplicates
+      for (const [, body] of l.matchAll(/(?:^:do\s*|\bdo=)\{([^{}]*)\}/g)) {
+        for (const c of body.split(/;\s*(?=\/)/)) if (c.trim().startsWith('/')) out.push(...normalize(c.trim().replace(/;\s*$/, '')));
+      }
       continue;
     }
     if (l.startsWith('/')) {
