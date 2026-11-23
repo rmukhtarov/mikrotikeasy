@@ -136,6 +136,48 @@ Finally it waits for the health check. Open `http://<host>:3090` when it finishe
 | Plain Docker | `docker run -d --name mikrotikeasy -p 3090:3090 -v /srv/mikrotikeasy:/data --env-file .env ghcr.io/rmukhtarov/mikrotikeasy:1.2.0` |
 | Without Docker (Node.js 18 or newer, no npm packages) | `cp .env.example .env && node server.mjs` |
 
+### Docker Compose example
+
+You do not need to clone the repository for this. Make a folder for the app and its data:
+
+```sh
+mkdir -p mikrotikeasy/data && cd mikrotikeasy
+sudo chown 1000:1000 data   # the app runs as user 1000 (node) inside the container
+```
+
+Save this as `compose.yaml` in that folder:
+
+```yaml
+services:
+  mikrotikeasy:
+    image: ghcr.io/rmukhtarov/mikrotikeasy:1.2.0
+    container_name: mikrotikeasy
+    restart: unless-stopped
+    ports:
+      - "3090:3090"
+    environment:
+      - TZ=Asia/Baku
+      # Optional AI assistant. The Master works without it, and you can also set it later
+      # in Settings (gear icon).
+      # - AI_ENABLED=true
+      # - LLM_BASE_URL=http://ollama.lan:11434/v1
+      # - LLM_API_KEY=
+      # - LLM_MODEL=qwen2.5-coder:14b
+    volumes:
+      - ./data:/data   # settings, the encrypted API key and the AI mistake memory
+```
+
+Start it and open `http://<host>:3090`:
+
+```sh
+docker compose up -d
+docker compose ps   # wait for "healthy"
+```
+
+To update, change the image tag to the new version and run `docker compose up -d` again. The data
+folder is kept. The `docker-compose.yml` in the repository is the same setup with every value read
+from `.env`.
+
 ## Windows (single .exe, no installation)
 
 Download `MikrotikEasy-<version>-win-x64.exe` (64-bit Windows) or `-win-x86.exe` (32-bit) from the
