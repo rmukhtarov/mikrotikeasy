@@ -83,7 +83,12 @@ schema and server-side lint rules.
   network too. The option is offered only on models that run the zerotier package (hAP ax, hAP ac2/ac3,
   RB3011, RB4011, RB5009), and the notes list the package, device-mode and ZeroTier Central steps.
 
-### VPN tunnel between two offices (beta)
+### VPN tunnel between two offices (beta, RouterOS 7 only)
+
+> [!IMPORTANT]
+> **RouterOS 7 only.** The link uses WireGuard, which RouterOS 6 does not have. Both routers must run
+> RouterOS 7. Check the version in the Winbox title bar or in *System > Resources*. On a RouterOS 6 router
+> the script stops without changing anything.
 
 > [!WARNING]
 > **Beta, not fully tested.** The generated scripts pass the RouterOS syntax check (`:parse` on RouterOS
