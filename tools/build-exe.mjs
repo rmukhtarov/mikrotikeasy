@@ -69,7 +69,8 @@ for (const arch of ARCHES) {
     '--set-version-string', 'ProductName', 'MikrotikEasy', '--set-version-string', 'FileDescription', 'MikrotikEasy - MikroTik RouterOS configurator',
     '--set-version-string', 'CompanyName', 'MikrotikEasy', '--set-version-string', 'LegalCopyright', 'MIT License',
     '--set-version-string', 'OriginalFilename', `MikrotikEasy-${version}-win-${arch}.exe`,
-    '--set-file-version', version, '--set-product-version', version]);
+    // Windows version resources take numbers only: 1.3.0-beta.1 -> file version 1.3.0, product version keeps the label
+    '--set-file-version', version.replace(/-.*/, ''), '--set-product-version', version]);
   run(process.execPath, [join(NM, 'postject', 'dist', 'cli.js'), out, 'NODE_SEA_BLOB', blob,
     '--sentinel-fuse', 'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2', '--overwrite']);
   console.log(`${out}  ${(statSync(out).size / 1048576).toFixed(1)} MB  sha256 ${sha256(out)}`);
