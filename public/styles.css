@@ -285,3 +285,4 @@ html[data-ai="0"] #vAi, html[data-ai="0"] #aiView, html[data-ai="0"] footer { di
 .lk-undo { margin: 14px 0; border: 1px dashed var(--line); border-radius: 10px; padding: 8px 12px; }
 .lk-undo summary { cursor: pointer; font-weight: 600; }
 pre, code { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+.lk-rostag { font-size: 12px; font-weight: 600; color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 55%, transparent); border-radius: 999px; padding: 1px 10px; }

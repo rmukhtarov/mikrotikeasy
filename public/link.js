@@ -7,6 +7,7 @@ const LK = {
   az: {
     tab: 'VPN tunel',
     intro: 'İki ofisin MikroTik router-lərini şifrəli WireGuard tuneli ilə birləşdirin. Router-lər artıq qurulubsa, bu alət hər biri üçün yalnız bağlantını əlavə edən skript hazırlayır. A = birinci ofis, B = ikinci ofis.',
+    ros7: 'Yalnız RouterOS 7: bu bağlantı WireGuard ilə qurulur, RouterOS 6-da WireGuard yoxdur. Hər iki router-in versiyasını Winbox-un başlığında və ya System → Resources-da yoxlayın. RouterOS 6 olan router-də skript heç nə dəyişmədən dayanır.', ros7Tag: 'yalnız RouterOS 7',
     aTitle: 'A ofisi', bTitle: 'B ofisi', name: 'Ofisin adı',
     lan: 'LAN şəbəkəsi', lanHint: 'Bu ofisdəki kompüter, server və printerlərin şəbəkəsi (router-in LAN-ı), məs. 192.168.88.0/24. Tunel şəbəkəsi DEYİL. Bir neçəsi vergüllə.',
     ep: 'Router-in public ünvanı', epHint: 'Statik IP və ya DDNS adı (məs. /ip cloud). Yoxdursa, boş saxlayın: bu router bağlantını özü başladacaq.',
@@ -34,6 +35,7 @@ const LK = {
   ru: {
     tab: 'VPN-туннель',
     intro: 'Соедините роутеры MikroTik двух офисов шифрованным туннелем WireGuard. Если роутеры уже настроены, инструмент готовит для каждого скрипт, который только добавляет связь. A — первый офис, B — второй.',
+    ros7: 'Только RouterOS 7: связь строится на WireGuard, а в RouterOS 6 WireGuard нет. Проверьте версию обоих роутеров в заголовке Winbox или в System → Resources. На роутере с RouterOS 6 скрипт остановится, ничего не изменив.', ros7Tag: 'только RouterOS 7',
     aTitle: 'Офис A', bTitle: 'Офис B', name: 'Название офиса',
     lan: 'LAN-сеть', lanHint: 'Сеть компьютеров, серверов и принтеров этого офиса (LAN роутера), напр. 192.168.88.0/24. НЕ сеть туннеля. Несколько через запятую.',
     ep: 'Публичный адрес роутера', epHint: 'Статический IP или DDNS (напр. /ip cloud). Если нет — оставьте пустым: этот роутер сам начнёт связь.',
@@ -61,6 +63,7 @@ const LK = {
   en: {
     tab: 'VPN tunnel',
     intro: 'Connect the MikroTik routers of two offices with an encrypted WireGuard tunnel. If the routers are already configured, this tool makes a script for each of them that only adds the link. A = first office, B = second office.',
+    ros7: 'RouterOS 7 only: the link uses WireGuard, which RouterOS 6 does not have. Check the version of both routers in the Winbox title bar or in System > Resources. On a RouterOS 6 router the script stops without changing anything.', ros7Tag: 'RouterOS 7 only',
     aTitle: 'Office A', bTitle: 'Office B', name: 'Office name',
     lan: 'LAN network', lanHint: 'The network of the computers, servers and printers in this office (the router\'s LAN), e.g. 192.168.88.0/24. NOT the tunnel network. Several separated by commas.',
     ep: 'Public address of the router', epHint: 'Static IP or DDNS name (e.g. /ip cloud). Leave empty if there is none: this router will start the link.',
@@ -144,7 +147,7 @@ export function createLinkTool(root, { lang, toast }) {
         <text class="dg-t dg-s lk-acc" x="${mid}" y="${LY + LH + 20}" text-anchor="middle">🔒 ${esc(d.reach(other))} ${esc(reach(mode, list))}</text>
       </g>`;
     const startsAt = ea && !eb ? 'b' : eb && !ea ? 'a' : '';
-    return `<div class="dg-wrap"><div class="dg-head"><b>${esc(d.title)}</b></div>
+    return `<div class="dg-wrap"><div class="dg-head"><b>${esc(d.title)}</b><span class="lk-rostag">${esc(t.ros7Tag)}</span></div>
       <svg class="dg" viewBox="0 0 820 ${LY + LH + 34}" role="img" aria-label="${esc(d.title)}">
         <g class="dg-cloud"><circle cx="384" cy="54" r="17"/><circle cx="410" cy="42" r="24"/><circle cx="436" cy="54" r="17"/><rect x="384" y="54" width="52" height="17"/></g>
         <text class="dg-t dg-s" x="410" y="22" text-anchor="middle">${esc(d.internet)}</text>
@@ -213,7 +216,7 @@ export function createLinkTool(root, { lang, toast }) {
     const t = T();
     res = buildLink(L, lang());
     const i = linkInfo(L);
-    root.innerHTML = `<p class="muted">${esc(t.intro)}</p><div class="lk-dg">${diagram()}</div>
+    root.innerHTML = `<p class="muted">${esc(t.intro)}</p><p class="box warnbox lk-ros7">${(() => { const [h, ...r] = t.ros7.split(':'); const rest = r.join(':').trim(); return `<b>⚠ ${esc(h)}.</b> ${esc(rest.charAt(0).toUpperCase() + rest.slice(1))}`; })()}</p><div class="lk-dg">${diagram()}</div>
       <div class="grid2 lk-offices">${officeHtml('a', t.aTitle)}${officeHtml('b', t.bTitle)}</div>
       <section class="lk-sec" id="lkTun"><h3>${esc(t.tunTitle)}</h3>
         <div class="grid2">${field(t.port, input('port', 'inputmode="numeric"'))}${field(t.tunnel, input('tunnel', 'spellcheck="false"'), t.tunnelHint)}</div>
