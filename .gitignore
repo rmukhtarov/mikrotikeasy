@@ -3,3 +3,6 @@ dist/
 *.tar
 *.tar.gz
 node_modules/
+data/settings.json
+data/.settings-secret
+build/
